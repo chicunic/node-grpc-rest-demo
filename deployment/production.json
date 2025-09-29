@@ -1,0 +1,17 @@
+{
+  "environment": "production",
+  "image": "us-central1-docker.pkg.dev/$PROJECT_ID",
+  "service": {
+    "name": "node-grpc-rest-demo",
+    "region": "us-central1",
+    "memory": "1Gi",
+    "cpu": "2",
+    "maxInstances": 20,
+    "minInstances": 2,
+    "allowUnauthenticated": false
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "LOG_LEVEL": "info"
+  }
+}

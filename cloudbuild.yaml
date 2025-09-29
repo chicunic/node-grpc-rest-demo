@@ -1,0 +1,118 @@
+steps:
+  # Step 1: Read configuration based on branch
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'read-config'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Install jq
+        apt-get update && apt-get install -y jq
+
+        if [ "$BRANCH_NAME" = "staging" ]; then
+          _CONFIG="deployment/staging.json"
+        elif [ "$BRANCH_NAME" = "production" ]; then
+          _CONFIG="deployment/production.json"
+        else
+          echo "Unsupported branch: $BRANCH_NAME"
+          exit 1
+        fi
+
+        echo "Using config file: $$_CONFIG"
+
+        # Extract variables from JSON
+        IMAGE_BASE=$$(cat $$_CONFIG | jq -r '.image')
+        SERVICE_NAME=$$(cat $$_CONFIG | jq -r '.service.name')
+        REGION=$$(cat $$_CONFIG | jq -r '.service.region')
+        MEMORY=$$(cat $$_CONFIG | jq -r '.service.memory')
+        CPU=$$(cat $$_CONFIG | jq -r '.service.cpu')
+        MAX_INSTANCES=$$(cat $$_CONFIG | jq -r '.service.maxInstances')
+        MIN_INSTANCES=$$(cat $$_CONFIG | jq -r '.service.minInstances')
+        ALLOW_UNAUTH=$$(cat $$_CONFIG | jq -r '.service.allowUnauthenticated')
+        NODE_ENV=$$(cat $$_CONFIG | jq -r '.env.NODE_ENV')
+        LOG_LEVEL=$$(cat $$_CONFIG | jq -r '.env.LOG_LEVEL')
+        IMAGE_NAME=$$IMAGE_BASE/$$SERVICE_NAME:${SHORT_SHA}
+
+        # Save to file for next step
+        echo "SERVICE_NAME=$$SERVICE_NAME" >> /workspace/build_vars
+        echo "REGION=$$REGION" >> /workspace/build_vars
+        echo "MEMORY=$$MEMORY" >> /workspace/build_vars
+        echo "CPU=$$CPU" >> /workspace/build_vars
+        echo "MAX_INSTANCES=$$MAX_INSTANCES" >> /workspace/build_vars
+        echo "MIN_INSTANCES=$$MIN_INSTANCES" >> /workspace/build_vars
+        echo "ALLOW_UNAUTH=$$ALLOW_UNAUTH" >> /workspace/build_vars
+        echo "NODE_ENV=$$NODE_ENV" >> /workspace/build_vars
+        echo "LOG_LEVEL=$$LOG_LEVEL" >> /workspace/build_vars
+        echo "IMAGE_NAME=$$IMAGE_NAME" >> /workspace/build_vars
+
+  # Step 2: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/build_vars
+        docker build -t $$IMAGE_NAME .
+
+  # Step 3: Push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/build_vars
+        docker push $$IMAGE_NAME
+
+  # Step 4: Deploy HTTP service to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy-http'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Load variables
+        source /workspace/build_vars
+
+        # Deploy HTTP service to Cloud Run
+        gcloud run deploy $$SERVICE_NAME \
+          --image $$IMAGE_NAME \
+          --region $$REGION \
+          --memory $$MEMORY \
+          --cpu $$CPU \
+          --max-instances $$MAX_INSTANCES \
+          --min-instances $$MIN_INSTANCES \
+          --set-env-vars NODE_ENV=$$NODE_ENV,LOG_LEVEL=$$LOG_LEVEL \
+          --startup-probe httpGet.path=/health,httpGet.port=8080,periodSeconds=10 \
+          --liveness-probe httpGet.path=/health,httpGet.port=8080,periodSeconds=300 \
+          --$$([ "$$ALLOW_UNAUTH" = "true" ] && echo "allow-unauthenticated" || echo "no-allow-unauthenticated")
+
+  # Step 5: Deploy gRPC service to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy-grpc'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Load variables
+        source /workspace/build_vars
+
+        # Deploy gRPC service to Cloud Run with HTTP/2 support and gRPC
+        gcloud run deploy $$SERVICE_NAME-grpc \
+          --image $$IMAGE_NAME \
+          --region $$REGION \
+          --memory $$MEMORY \
+          --cpu $$CPU \
+          --max-instances $$MAX_INSTANCES \
+          --min-instances $$MIN_INSTANCES \
+          --set-env-vars NODE_ENV=$$NODE_ENV,LOG_LEVEL=$$LOG_LEVEL \
+          --command pnpm \
+          --args start:grpc \
+          --use-http2 \
+          --startup-probe grpc.port=8080,periodSeconds=10 \
+          --liveness-probe grpc.port=8080,periodSeconds=300 \
+          --$$([ "$$ALLOW_UNAUTH" = "true" ] && echo "allow-unauthenticated" || echo "no-allow-unauthenticated")
+
+options:
+  logging: CLOUD_LOGGING_ONLY

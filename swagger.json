@@ -1,0 +1,610 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Node.js gRPC / REST API Template",
+    "description": "A template for building Node.js APIs with both gRPC and REST support",
+    "version": "1.0.0",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check endpoint",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "List users",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "example": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Field to sort by (e.g., 'username', 'email', 'createdAt')",
+            "schema": {
+              "type": "string",
+              "enum": ["username", "email", "fullName", "createdAt", "updatedAt"]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter users by text search",
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "example": "alice"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-4321-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-4321-a456-426614174000"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-4321-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Search products",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search query string",
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "example": "Test Product"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by product category",
+            "schema": {
+              "type": "string",
+              "maxLength": 50,
+              "example": "Electronics"
+            }
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "description": "Minimum price filter",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "example": 100
+            }
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "description": "Maximum price filter",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "example": 1000
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "example": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchProductsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create a new product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-4321-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "User entity",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "username": {
+            "type": "string",
+            "example": "testuser123"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "test@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Test User"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["username", "email", "fullName"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "testuser123"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "test@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Test User"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "alice"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alice@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Alice Smith"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "ListUsersResponse": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "example": 42
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Test Product"
+          },
+          "description": {
+            "type": "string",
+            "example": "This is a test product"
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999999,
+            "example": 100
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999,
+            "example": 50
+          },
+          "category": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateProductRequest": {
+        "type": "object",
+        "required": ["name", "description", "price", "quantity", "category"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Test Product"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "example": "This is a test product"
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999999,
+            "example": 100
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999,
+            "example": 50
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "example": "Electronics"
+          }
+        }
+      },
+      "SearchProductsResponse": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "example": 42
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "environment": "staging",
+  "image": "us-central1-docker.pkg.dev/$PROJECT_ID",
+  "service": {
+    "name": "node-grpc-rest-demo-staging",
+    "region": "us-central1",
+    "memory": "512Mi",
+    "cpu": "1",
+    "maxInstances": 5,
+    "minInstances": 1,
+    "allowUnauthenticated": true
+  },
+  "env": {
+    "NODE_ENV": "staging",
+    "LOG_LEVEL": "debug"
+  }
+}

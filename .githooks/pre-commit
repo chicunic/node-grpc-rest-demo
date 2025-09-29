@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Pre-commit hook
+# This hook runs before every commit to ensure code quality
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}🔍 Running pre-commit checks...${NC}"
+
+# Check if pnpm is installed
+if ! command -v pnpm &> /dev/null; then
+    echo -e "${RED}❌ pnpm is not installed${NC}"
+    exit 1
+fi
+
+# Code quality check
+echo -e "${YELLOW}🔍 Running code quality checks...${NC}"
+if ! pnpm run check; then
+    echo -e "${RED}❌ Code quality checks failed!${NC}"
+    echo -e "${YELLOW}💡 Run 'pnpm run fix' to auto-fix formatting and linting issues${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Code quality checks passed${NC}"
+
+# Security check
+echo -e "${YELLOW}🔐 Running security check...${NC}"
+sensitive_file=$(git diff --cached --name-only | grep -v "^\.githooks/" | xargs grep -lE "(gcp-.*-[0-9]|api[_-]?key|secret[_-]?key|access[_-]?token|bearer[_-]?token|jwt[_-]?token|password\s*=|mongodb://.*:[^@]*@|mysql://.*:[^@]*@|postgres://.*:[^@]*@|AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{32,}|xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}|-----BEGIN.*PRIVATE KEY-----|client_secret|webhook_secret|encryption_key)" 2>/dev/null | head -1)
+if [ ! -z "$sensitive_file" ]; then
+    echo -e "${RED}❌ Sensitive information detected in: ${sensitive_file}${NC}"
+    echo -e "${YELLOW}Please remove any secrets, API keys, or credentials before committing${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Security check passed${NC}"
+
+echo -e "${GREEN}✅ All pre-commit checks passed!${NC}"
