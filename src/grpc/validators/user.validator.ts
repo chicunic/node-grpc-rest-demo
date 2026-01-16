@@ -11,7 +11,6 @@ import {
   MaxLength,
   Min,
   MinLength,
-  ValidateNested,
 } from 'class-validator';
 
 // Get User Request DTO (for ID validation)
@@ -41,8 +40,13 @@ export class CreateUserRequestDto {
   full_name!: string;
 }
 
-// Update User Data DTO
-export class UpdateUserDataDto {
+// Update User Request DTO
+export class UpdateUserRequestDto {
+  @IsNotEmpty({ message: 'id is required' })
+  @IsString({ message: 'id must be a string' })
+  @IsUUID('4', { message: 'id must be a valid UUID v4' })
+  id!: string;
+
   @IsOptional()
   @IsString({ message: 'username must be a string' })
   @MinLength(3, { message: 'username must be at least 3 characters' })
@@ -63,19 +67,6 @@ export class UpdateUserDataDto {
   @IsBoolean({ message: 'is_active must be a boolean' })
   @Type(() => Boolean)
   is_active?: boolean;
-}
-
-// Update User Request DTO
-export class UpdateUserRequestDto {
-  @IsNotEmpty({ message: 'id is required' })
-  @IsString({ message: 'id must be a string' })
-  @IsUUID('4', { message: 'id must be a valid UUID v4' })
-  id!: string;
-
-  @IsNotEmpty({ message: 'data is required' })
-  @ValidateNested()
-  @Type(() => UpdateUserDataDto)
-  data!: UpdateUserDataDto;
 }
 
 // Delete User Request DTO (for ID validation)

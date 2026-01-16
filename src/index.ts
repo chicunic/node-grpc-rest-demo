@@ -1,21 +1,12 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import * as OpenApiValidator from 'express-openapi-validator';
 import helmet from 'helmet';
-import path from 'path';
 import 'reflect-metadata';
-import swaggerUi from 'swagger-ui-express';
-import { fileURLToPath } from 'url';
 
-import * as swaggerDocument from '../swagger.json';
 import { createStructuredLogger, logHttpRequest } from './config/logger';
 import { productRoutes } from './routes/product.route';
 import { userRoutes } from './routes/user.route';
-
-// ES module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -44,32 +35,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// OpenAPI validation middleware
-app.use(
-  OpenApiValidator.middleware({
-    apiSpec: path.join(__dirname, '../swagger.json'),
-    validateRequests: true,
-    validateResponses: false, // Set to true if you want response validation too
-    ignorePaths: /(.*\/api-docs.*|.*\.well-known.*)/,
-  })
-);
-
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-// Swagger documentation (only enabled in development environment)
-if (process.env.NODE_ENV === 'development') {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-}
 
 // API Routes
 app.use('/api/v1', userRoutes);
 app.use('/api/v1', productRoutes);
 
 // Error handling middleware
-app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('HTTP Error', err instanceof Error ? err : { error: err });
 
   // Handle OpenAPI validation errors
@@ -87,7 +63,7 @@ app.use((err: unknown, req: express.Request, res: express.Response, next: expres
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 

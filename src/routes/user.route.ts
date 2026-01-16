@@ -1,7 +1,7 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 
 import { createUser, deleteUser, getUser, listUsers, updateUser } from '../services/user.service';
-import {
+import type {
   CreateUserRequest,
   DeleteUserResponse,
   GetUserParams,
@@ -10,7 +10,7 @@ import {
   UpdateUserRequest,
   User,
 } from '../types/user.types';
-import { ErrorResponse, handleRouteError } from '../utils/error.handler';
+import { type ErrorResponse, handleRouteError } from '../utils/error.handler';
 
 const router = Router();
 
@@ -47,7 +47,7 @@ router.put(
     } catch (error) {
       handleRouteError(error, res, 'PUT /users/:id endpoint');
     }
-  }
+  },
 );
 
 // Delete user
@@ -67,12 +67,17 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ListUsersQuery>, res: Response<ListUsersResponse | ErrorResponse>) => {
     try {
       const { page, pageSize, sortBy, filter } = req.query;
-      const result = await listUsers({ page, pageSize, sortBy, filter });
+      const result = await listUsers({
+        page: Number(page),
+        pageSize: Number(pageSize),
+        sortBy,
+        filter,
+      });
       res.status(200).json(result);
     } catch (error) {
       handleRouteError(error, res, 'GET /users endpoint');
     }
-  }
+  },
 );
 
 export const userRoutes: Router = router;

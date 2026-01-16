@@ -1,6 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { CreateUserRequest, ListUsersQuery, ListUsersResponse, UpdateUserRequest, User } from '../types/user.types';
+import type {
+  CreateUserRequest,
+  ListUsersQuery,
+  ListUsersResponse,
+  UpdateUserRequest,
+  User,
+} from '../types/user.types';
 
 // In-memory storage for users
 const users = new Map<string, User>();
@@ -50,37 +56,33 @@ export async function deleteUser(id: string): Promise<boolean> {
 }
 
 export async function listUsers(options: ListUsersQuery): Promise<ListUsersResponse> {
-  const page = options.page;
-  const pageSize = options.pageSize;
-  const filter = options.filter?.toLowerCase();
+  const { page, pageSize, sortBy, filter } = options;
+  const filterLower = filter?.toLowerCase();
 
   const userList = Array.from(users.values())
-    .filter(user => {
-      // Apply filter if specified
-      if (!filter) return true;
+    .filter((user) => {
+      if (!filterLower) return true;
       return (
-        user.username.toLowerCase().includes(filter) ||
-        user.email.toLowerCase().includes(filter) ||
-        user.fullName.toLowerCase().includes(filter)
+        user.username.toLowerCase().includes(filterLower) ||
+        user.email.toLowerCase().includes(filterLower) ||
+        user.fullName.toLowerCase().includes(filterLower)
       );
     })
     .sort((a, b) => {
-      // Apply sorting if specified
-      if (!options.sortBy) return 0;
-      const aValue = a[options.sortBy as keyof User];
-      const bValue = b[options.sortBy as keyof User];
+      if (!sortBy) return 0;
+      const aValue = a[sortBy as keyof User];
+      const bValue = b[sortBy as keyof User];
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return aValue.localeCompare(bValue);
       }
       return 0;
     });
 
-  const total = userList.length;
   const start = (page - 1) * pageSize;
 
   return {
     users: userList.slice(start, start + pageSize),
-    totalCount: total,
+    totalCount: userList.length,
     page,
     pageSize,
   };

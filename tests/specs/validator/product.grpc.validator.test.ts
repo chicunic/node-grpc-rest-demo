@@ -5,17 +5,17 @@
 // Enable service mocks BEFORE any other imports
 import * as grpc from '@grpc/grpc-js';
 
-import {
+import type {
   CreateProductRequestDto,
   GetProductRequestDto,
   SearchProductsRequestDto,
 } from '../../../src/grpc/validators/product.validator';
-import { GrpcProductResponse, GrpcSearchProductsResponse } from '../../../src/types/product.types';
+import type { GrpcProductResponse, GrpcSearchProductsResponse } from '../../../src/types/product.types';
 import { TEST_FAKE_UUID } from '../../utils/data';
 import { enableProductServiceMock, mockProductService } from '../../utils/mock.index';
 import {
-  type GrpcTestClient,
   createGrpcTestClient,
+  type GrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
 } from '../../utils/server.grpc';
@@ -49,7 +49,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest)
+        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('name is required'),
@@ -69,8 +69,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('name is required'),
@@ -90,8 +90,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('name must be at most 100 characters'),
@@ -108,7 +108,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest)
+        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('description is required'),
@@ -128,8 +128,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('description must be at most 500 characters'),
@@ -149,8 +149,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('price cannot be negative'),
@@ -170,8 +170,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('price cannot exceed 99,999,999'),
@@ -191,8 +191,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('price must be an integer'),
@@ -212,8 +212,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('quantity cannot be negative'),
@@ -233,8 +233,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('quantity cannot exceed 99,999'),
@@ -251,7 +251,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest)
+        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'CreateProduct', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('category is required'),
@@ -271,8 +271,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'CreateProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('category must be at most 50 characters'),
@@ -291,7 +291,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<CreateProductRequestDto, GrpcProductResponse>(
         testClient.productClient,
         'CreateProduct',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -305,7 +305,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'GetProduct', invalidRequest)
+        promisifyGrpcCall<object, GrpcProductResponse>(testClient.productClient, 'GetProduct', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -321,8 +321,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<GetProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'GetProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -338,8 +338,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<GetProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'GetProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id must be a valid UUID v4'),
@@ -355,8 +355,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<GetProductRequestDto, GrpcProductResponse>(
           testClient.productClient,
           'GetProduct',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id must be a valid UUID v4'),
@@ -372,7 +372,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       await promisifyGrpcCall<GetProductRequestDto, GrpcProductResponse>(
         testClient.productClient,
         'GetProduct',
-        validRequest
+        validRequest,
       );
     });
   });
@@ -389,8 +389,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('query must be at most 100 characters'),
@@ -408,8 +408,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('category must be at most 50 characters'),
@@ -427,8 +427,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('min_price cannot be negative'),
@@ -444,8 +444,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<object, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('min_price must be an integer'),
@@ -463,8 +463,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('max_price cannot be negative'),
@@ -480,8 +480,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<object, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('max_price must be an integer'),
@@ -498,8 +498,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at least 1'),
@@ -516,8 +516,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at most 10000'),
@@ -534,8 +534,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at least 1'),
@@ -552,8 +552,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at most 100'),
@@ -570,8 +570,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at least 1'),
@@ -588,8 +588,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at least 1'),
@@ -607,8 +607,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('min_price must be an integer'),
@@ -626,8 +626,8 @@ describe('Product Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
           testClient.productClient,
           'SearchProducts',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('max_price must be an integer'),
@@ -647,7 +647,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
         testClient.productClient,
         'SearchProducts',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -662,7 +662,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
         testClient.productClient,
         'SearchProducts',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -679,7 +679,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
         testClient.productClient,
         'SearchProducts',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -696,7 +696,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
         testClient.productClient,
         'SearchProducts',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -713,7 +713,7 @@ describe('Product Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<SearchProductsRequestDto, GrpcSearchProductsResponse>(
         testClient.productClient,
         'SearchProducts',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();

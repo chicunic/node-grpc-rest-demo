@@ -1,14 +1,14 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 
 import { createProduct, getProduct, searchProducts } from '../services/product.service';
-import {
+import type {
   CreateProductRequest,
   GetProductParams,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
 } from '../types/product.types';
-import { ErrorResponse, handleRouteError } from '../utils/error.handler';
+import { type ErrorResponse, handleRouteError } from '../utils/error.handler';
 
 const router = Router();
 
@@ -45,23 +45,23 @@ router.get(
   '/products',
   async (
     req: Request<unknown, unknown, unknown, SearchProductsQuery>,
-    res: Response<SearchProductsResponse | ErrorResponse>
+    res: Response<SearchProductsResponse | ErrorResponse>,
   ) => {
     try {
       const { query, category, minPrice, maxPrice, page, pageSize } = req.query;
       const result = await searchProducts({
         query,
         category,
-        minPrice,
-        maxPrice,
-        page,
-        pageSize,
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        page: Number(page),
+        pageSize: Number(pageSize),
       });
       res.json(result);
     } catch (error) {
       handleRouteError(error, res, 'GET /products endpoint');
     }
-  }
+  },
 );
 
 export const productRoutes: Router = router;

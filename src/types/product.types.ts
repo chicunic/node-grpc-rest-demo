@@ -1,4 +1,4 @@
-import { PaginationQuery, PaginationResponse } from './pagination.types';
+import type { PaginationQuery, PaginationResponse } from './pagination.types';
 
 // REST API interfaces
 export interface Product {

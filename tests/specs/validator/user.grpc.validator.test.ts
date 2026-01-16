@@ -4,14 +4,14 @@
  */
 import * as grpc from '@grpc/grpc-js';
 
-import {
+import type {
   CreateUserRequestDto,
   DeleteUserRequestDto,
   GetUserRequestDto,
   ListUsersRequestDto,
   UpdateUserRequestDto,
 } from '../../../src/grpc/validators/user.validator';
-import {
+import type {
   GrpcCreateUserResponse,
   GrpcDeleteUserResponse,
   GrpcGetUserResponse,
@@ -21,8 +21,8 @@ import {
 import { TEST_FAKE_UUID } from '../../utils/data';
 import { enableUserServiceMock, mockUserService } from '../../utils/mock.index';
 import {
-  type GrpcTestClient,
   createGrpcTestClient,
+  type GrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
 } from '../../utils/server.grpc';
@@ -55,7 +55,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('username is required'),
@@ -73,8 +73,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
           testClient.userClient,
           'CreateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('username is required'),
@@ -92,8 +92,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
           testClient.userClient,
           'CreateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('username must be at least 3 characters'),
@@ -111,8 +111,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
           testClient.userClient,
           'CreateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('username must be at most 50 characters'),
@@ -127,7 +127,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('email is required'),
@@ -145,8 +145,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
           testClient.userClient,
           'CreateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('email must be a valid email address'),
@@ -161,7 +161,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcCreateUserResponse>(testClient.userClient, 'CreateUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('full_name is required'),
@@ -179,8 +179,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
           testClient.userClient,
           'CreateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('full_name must be at most 100 characters'),
@@ -197,7 +197,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<CreateUserRequestDto, GrpcCreateUserResponse>(
         testClient.userClient,
         'CreateUser',
-        validRequest
+        validRequest,
       );
 
       expect(response).toBeDefined();
@@ -211,7 +211,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -224,7 +224,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<GetUserRequestDto, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest)
+        promisifyGrpcCall<GetUserRequestDto, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -237,7 +237,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<GetUserRequestDto, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest)
+        promisifyGrpcCall<GetUserRequestDto, GrpcGetUserResponse>(testClient.userClient, 'GetUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id must be a valid UUID v4'),
@@ -264,7 +264,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcUpdateUserResponse>(testClient.userClient, 'UpdateUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcUpdateUserResponse>(testClient.userClient, 'UpdateUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -283,82 +283,62 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
           testClient.userClient,
           'UpdateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id must be a valid UUID v4'),
       });
     });
 
-    it('should reject request with missing data', async () => {
+    it('should reject request with invalid username', async () => {
       const invalidRequest = {
         id: TEST_FAKE_UUID,
-        // data missing
-      };
-
-      await expect(
-        promisifyGrpcCall<object, GrpcUpdateUserResponse>(testClient.userClient, 'UpdateUser', invalidRequest)
-      ).rejects.toMatchObject({
-        code: grpc.status.INVALID_ARGUMENT,
-        details: expect.stringContaining('data is required'),
-      });
-    });
-
-    it('should reject request with invalid username in data', async () => {
-      const invalidRequest = {
-        id: TEST_FAKE_UUID,
-        data: {
-          username: 'ab', // Invalid: too short
-        },
+        username: 'ab', // Invalid: too short
       };
 
       await expect(
         promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
           testClient.userClient,
           'UpdateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('username must be at least 3 characters'),
       });
     });
 
-    it('should reject request with invalid email in data', async () => {
+    it('should reject request with invalid email', async () => {
       const invalidRequest = {
         id: TEST_FAKE_UUID,
-        data: {
-          email: 'invalid-email',
-        },
+        email: 'invalid-email',
       };
 
       await expect(
         promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
           testClient.userClient,
           'UpdateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('email must be a valid email address'),
       });
     });
 
-    it('should reject request with invalid full_name in data', async () => {
+    it('should reject request with invalid full_name', async () => {
       const invalidRequest = {
         id: TEST_FAKE_UUID,
-        data: {
-          full_name: 'a'.repeat(101), // Invalid: too long
-        },
+        full_name: 'a'.repeat(101), // Invalid: too long
       };
 
       await expect(
         promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
           testClient.userClient,
           'UpdateUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('full_name must be at most 100 characters'),
@@ -369,18 +349,16 @@ describe('User Service - gRPC Parameter Validator', () => {
       expect.assertions(0);
       const validRequest = {
         id: TEST_FAKE_UUID,
-        data: {
-          username: 'newusername',
-          email: 'newemail@example.com',
-          full_name: 'New Full Name',
-          is_active: false,
-        },
+        username: 'newusername',
+        email: 'newemail@example.com',
+        full_name: 'New Full Name',
+        is_active: false,
       };
 
       await promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
         testClient.userClient,
         'UpdateUser',
-        validRequest
+        validRequest,
       );
     });
 
@@ -388,15 +366,13 @@ describe('User Service - gRPC Parameter Validator', () => {
       expect.assertions(0);
       const validRequest = {
         id: TEST_FAKE_UUID,
-        data: {
-          email: 'newemail@example.com',
-        },
+        email: 'newemail@example.com',
       };
 
       await promisifyGrpcCall<UpdateUserRequestDto, GrpcUpdateUserResponse>(
         testClient.userClient,
         'UpdateUser',
-        validRequest
+        validRequest,
       );
     });
   });
@@ -408,7 +384,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       };
 
       await expect(
-        promisifyGrpcCall<object, GrpcDeleteUserResponse>(testClient.userClient, 'DeleteUser', invalidRequest)
+        promisifyGrpcCall<object, GrpcDeleteUserResponse>(testClient.userClient, 'DeleteUser', invalidRequest),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id is required'),
@@ -424,8 +400,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<DeleteUserRequestDto, GrpcDeleteUserResponse>(
           testClient.userClient,
           'DeleteUser',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('id must be a valid UUID v4'),
@@ -441,7 +417,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       await promisifyGrpcCall<DeleteUserRequestDto, GrpcDeleteUserResponse>(
         testClient.userClient,
         'DeleteUser',
-        validRequest
+        validRequest,
       );
     });
   });
@@ -457,8 +433,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at least 1'),
@@ -475,8 +451,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at least 1'),
@@ -494,8 +470,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('filter must be at most 100 characters'),
@@ -512,8 +488,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at most 10000'),
@@ -530,8 +506,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at most 100'),
@@ -548,8 +524,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page must be at least 1'),
@@ -566,8 +542,8 @@ describe('User Service - gRPC Parameter Validator', () => {
         promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
           testClient.userClient,
           'ListUsers',
-          invalidRequest
-        )
+          invalidRequest,
+        ),
       ).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining('page_size must be at least 1'),
@@ -585,7 +561,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
         testClient.userClient,
         'ListUsers',
-        validRequest
+        validRequest,
       );
 
       // Should pass validation and return successful response
@@ -602,7 +578,7 @@ describe('User Service - gRPC Parameter Validator', () => {
       const response = await promisifyGrpcCall<ListUsersRequestDto, GrpcListUsersResponse>(
         testClient.userClient,
         'ListUsers',
-        validRequest
+        validRequest,
       );
 
       // Should pass validation and return successful response

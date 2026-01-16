@@ -11,7 +11,7 @@ process.env.NODE_ENV = 'test';
 const expectedErrors: string[] = ['Product not found', 'User not found', 'gRPC Error'];
 
 const shouldSuppressWinstonLog = (message: string): boolean => {
-  return expectedErrors.some(pattern => message.includes(pattern));
+  return expectedErrors.some((pattern) => message.includes(pattern));
 };
 
 const originalStdoutWrite = process.stdout.write;
@@ -40,5 +40,3 @@ afterAll(() => {
   // Restore original stdout
   process.stdout.write = originalStdoutWrite;
 });
-
-export {};

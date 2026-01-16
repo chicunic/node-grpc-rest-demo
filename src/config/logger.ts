@@ -1,5 +1,5 @@
 import { LoggingWinston } from '@google-cloud/logging-winston';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import winston from 'winston';
 
 const { combine, timestamp, printf, colorize, errors, json } = winston.format;
@@ -24,7 +24,7 @@ const createLogger = (): winston.Logger => {
         process.env.NODE_ENV === 'production'
           ? combine(timestamp(), errors({ stack: true }), json())
           : combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), colorize(), localLogFormat),
-    })
+    }),
   );
 
   // Add Google Cloud Logging in production
@@ -71,7 +71,7 @@ export const logger = createLogger();
 
 // Structured logging helpers
 export const createStructuredLogger = (
-  context: string
+  context: string,
 ): {
   info: (message: string, metadata?: object) => winston.Logger;
   warn: (message: string, metadata?: object) => winston.Logger;
@@ -117,7 +117,7 @@ export const logGrpcRequest = (
   method: string,
   metadata: Record<string, unknown>,
   duration?: number,
-  error?: Error
+  error?: Error,
 ): void => {
   const logData = {
     method,

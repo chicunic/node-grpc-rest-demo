@@ -1,10 +1,9 @@
 /**
  * User Service Mock Utilities
- * User service specific mocks and setup functions
  */
-import { jest } from '@jest/globals';
+import type { jest } from '@jest/globals';
 
-import {
+import type {
   CreateUserRequest,
   ListUsersQuery,
   ListUsersResponse,
@@ -12,9 +11,8 @@ import {
   User,
 } from '../../src/types/user.types';
 import { MOCK_USER_RESPONSE } from './data';
-import { createJestMock, createSimpleModuleMock } from './mock.factory';
+import { createJestMock, createModuleMock } from './mock.factory';
 
-// Mock user service with all API functions
 export const mockUserService = {
   createUser: createJestMock() as jest.Mock<(data: CreateUserRequest) => Promise<User>>,
   getUser: createJestMock() as jest.Mock<(id: string) => Promise<User>>,
@@ -22,31 +20,30 @@ export const mockUserService = {
   deleteUser: createJestMock() as jest.Mock<(id: string) => Promise<boolean>>,
   listUsers: createJestMock() as jest.Mock<(options: ListUsersQuery) => Promise<ListUsersResponse>>,
 
-  setup: (): void => {
-    // Setup mock responses with test data
-    mockUserService.createUser.mockResolvedValue(MOCK_USER_RESPONSE);
-    mockUserService.getUser.mockResolvedValue(MOCK_USER_RESPONSE);
-    mockUserService.updateUser.mockResolvedValue(MOCK_USER_RESPONSE);
-    mockUserService.deleteUser.mockResolvedValue(true);
-    mockUserService.listUsers.mockResolvedValue({
+  setup(): void {
+    this.createUser.mockResolvedValue(MOCK_USER_RESPONSE);
+    this.getUser.mockResolvedValue(MOCK_USER_RESPONSE);
+    this.updateUser.mockResolvedValue(MOCK_USER_RESPONSE);
+    this.deleteUser.mockResolvedValue(true);
+    this.listUsers.mockResolvedValue({
       users: [MOCK_USER_RESPONSE],
       totalCount: 1,
       page: 1,
       pageSize: 10,
     });
   },
-  reset: (): void => {
-    mockUserService.createUser.mockReset();
-    mockUserService.getUser.mockReset();
-    mockUserService.updateUser.mockReset();
-    mockUserService.deleteUser.mockReset();
-    mockUserService.listUsers.mockReset();
+
+  reset(): void {
+    this.createUser.mockReset();
+    this.getUser.mockReset();
+    this.updateUser.mockReset();
+    this.deleteUser.mockReset();
+    this.listUsers.mockReset();
   },
 };
 
-// Enable user service mock when needed
 export function enableUserServiceMock(): typeof jest {
-  return createSimpleModuleMock('../../src/services/user.service', {
+  return createModuleMock('../../src/services/user.service', {
     createUser: mockUserService.createUser,
     getUser: mockUserService.getUser,
     updateUser: mockUserService.updateUser,

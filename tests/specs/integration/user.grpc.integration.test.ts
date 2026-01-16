@@ -6,7 +6,7 @@
 import * as grpc from '@grpc/grpc-js';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 
-import {
+import type {
   GrpcCreateUserResponse,
   GrpcDeleteUserResponse,
   GrpcGetUserResponse,
@@ -16,8 +16,8 @@ import {
 import { LIST_USERS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_USER } from '../../utils/data';
 import { expectValidISOString, expectValidUUID } from '../../utils/helpers';
 import {
-  GrpcTestClient,
   createGrpcTestClient,
+  type GrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
 } from '../../utils/server.grpc';
@@ -48,7 +48,7 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcCreateUserResponse>(
         grpcClient.userClient,
         'CreateUser',
-        request
+        request,
       );
 
       expect(response).toBeDefined();
@@ -70,7 +70,7 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof getRequest, GrpcGetUserResponse>(
         grpcClient.userClient,
         'GetUser',
-        getRequest
+        getRequest,
       );
 
       expect(response).toBeDefined();
@@ -89,19 +89,18 @@ describe('User - gRPC Integration', () => {
       };
       const updateRequest = {
         id: userId,
-        data: {
-          full_name: updateData.fullName,
-          is_active: updateData.isActive,
-        },
+        full_name: updateData.fullName,
+        is_active: updateData.isActive,
       };
       const response = await promisifyGrpcCall<typeof updateRequest, GrpcUpdateUserResponse>(
         grpcClient.userClient,
         'UpdateUser',
-        updateRequest
+        updateRequest,
       );
 
       expect(response).toBeDefined();
       expect(response.user).toBeDefined();
+      expect(response.message).toBe('User updated successfully');
       expect(response.user.id).toBe(userId);
       expect(response.user.username).toBe(TEST_USER.username); // unchanged
       expect(response.user.email).toBe(TEST_USER.email); // unchanged
@@ -115,14 +114,12 @@ describe('User - gRPC Integration', () => {
       };
       const updateRequest = {
         id: userId,
-        data: {
-          email: partialUpdateData.email,
-        },
+        email: partialUpdateData.email,
       };
       const response = await promisifyGrpcCall<typeof updateRequest, GrpcUpdateUserResponse>(
         grpcClient.userClient,
         'UpdateUser',
-        updateRequest
+        updateRequest,
       );
 
       expect(response.user.email).toBe(partialUpdateData.email);
@@ -136,11 +133,11 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof deleteRequest, GrpcDeleteUserResponse>(
         grpcClient.userClient,
         'DeleteUser',
-        deleteRequest
+        deleteRequest,
       );
 
       expect(response).toBeDefined();
-      expect(response.success).toBe(true);
+      expect(response.message).toBe('User deleted successfully');
 
       // Verify user is deleted
       try {
@@ -193,7 +190,7 @@ describe('User - gRPC Integration', () => {
   describe('ListUsers - gRPC Integration', () => {
     beforeAll(async () => {
       // Create multiple users for list testing
-      const users = LIST_USERS.map(user => ({
+      const users = LIST_USERS.map((user) => ({
         username: user.username,
         email: user.email,
         full_name: user.fullName,
@@ -213,7 +210,7 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcListUsersResponse>(
         grpcClient.userClient,
         'ListUsers',
-        request
+        request,
       );
 
       expect(response).toBeDefined();
@@ -232,7 +229,7 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcListUsersResponse>(
         grpcClient.userClient,
         'ListUsers',
-        request
+        request,
       );
 
       expect(response.users).toBeInstanceOf(Array);
@@ -251,7 +248,7 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcListUsersResponse>(
         grpcClient.userClient,
         'ListUsers',
-        request
+        request,
       );
 
       expect(response.users).toBeInstanceOf(Array);
@@ -275,14 +272,14 @@ describe('User - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcListUsersResponse>(
         grpcClient.userClient,
         'ListUsers',
-        request
+        request,
       );
 
       expect(response.users).toBeInstanceOf(Array);
       expect(response.total_count).toBeGreaterThan(0);
 
       // Check if filtered results contain 'alice'
-      response.users.forEach(user => {
+      response.users.forEach((user) => {
         const userString = JSON.stringify(user).toLowerCase();
         expect(userString).toContain('alice');
       });

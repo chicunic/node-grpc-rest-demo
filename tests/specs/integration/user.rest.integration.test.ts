@@ -3,11 +3,11 @@
  * Tests complete REST service using real server implementation with minimal mocking
  */
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import express from 'express';
+import type express from 'express';
 
 import { LIST_USERS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_USER } from '../../utils/data';
 import { expectValidISOString, expectValidUUID, restAssert } from '../../utils/helpers';
-import { RestTestHelper, createCompleteTestApp } from '../../utils/server.rest';
+import { createCompleteTestApp, RestTestHelper } from '../../utils/server.rest';
 
 interface UserData {
   username: string;
@@ -142,7 +142,7 @@ describe('User - REST Integration', () => {
 
     it('should support custom pagination', async () => {
       const response = await helper.get(
-        `/api/v1/users?page=${TEST_PAGINATION.DEFAULT_PAGE}&pageSize=${TEST_PAGINATION.SMALL_PAGE_SIZE}`
+        `/api/v1/users?page=${TEST_PAGINATION.DEFAULT_PAGE}&pageSize=${TEST_PAGINATION.SMALL_PAGE_SIZE}`,
       );
 
       restAssert.expectSuccess(response, 200);

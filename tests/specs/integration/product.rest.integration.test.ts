@@ -3,11 +3,11 @@
  * Tests complete REST service using real server implementation with minimal mocking
  */
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import express from 'express';
+import type express from 'express';
 
 import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PRODUCT } from '../../utils/data';
 import { expectValidISOString, expectValidUUID, restAssert } from '../../utils/helpers';
-import { RestTestHelper, createCompleteTestApp } from '../../utils/server.rest';
+import { createCompleteTestApp, RestTestHelper } from '../../utils/server.rest';
 
 interface ProductData {
   name: string;
@@ -140,7 +140,7 @@ describe('Product - REST Integration', () => {
       const minPrice = 100;
       const maxPrice = 300;
       const response = await helper.get(
-        `/api/v1/products?minPrice=${minPrice}&maxPrice=${maxPrice}&page=1&pageSize=10`
+        `/api/v1/products?minPrice=${minPrice}&maxPrice=${maxPrice}&page=1&pageSize=10`,
       );
 
       restAssert.expectSuccess(response, 200);
@@ -157,7 +157,7 @@ describe('Product - REST Integration', () => {
       const category = 'Electronics';
       const minPrice = 800;
       const response = await helper.get(
-        `/api/v1/products?category=${category}&minPrice=${minPrice}&page=1&pageSize=10`
+        `/api/v1/products?category=${category}&minPrice=${minPrice}&page=1&pageSize=10`,
       );
 
       restAssert.expectSuccess(response, 200);

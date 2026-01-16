@@ -1,8 +1,8 @@
 /**
  * Test data and constants for all services
  */
-import { CreateProductRequest, Product } from '../../src/types/product.types';
-import { CreateUserRequest, User } from '../../src/types/user.types';
+import type { CreateProductRequest, Product } from '../../src/types/product.types';
+import type { CreateUserRequest, User } from '../../src/types/user.types';
 
 // ===== COMMON CONSTANTS =====
 export const TEST_FAKE_UUID = '123e4567-e89b-4321-a456-426614174000';

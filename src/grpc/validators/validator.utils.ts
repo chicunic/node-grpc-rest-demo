@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
 import { plainToClass } from 'class-transformer';
-import { ValidationError, validate } from 'class-validator';
+import { type ValidationError, validate } from 'class-validator';
 
 export interface ValidationResult {
   isValid: boolean;

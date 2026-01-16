@@ -1,11 +1,12 @@
-import * as grpc from '@grpc/grpc-js';
+import type * as grpc from '@grpc/grpc-js';
 
 import { createProduct, getProduct, searchProducts } from '../../services/product.service';
-import {
+import type {
   CreateProductRequest,
   GrpcProduct,
   GrpcProductResponse,
   GrpcSearchProductsResponse,
+  Product,
 } from '../../types/product.types';
 import { handleGrpcError } from '../../utils/error.handler';
 import {
@@ -15,10 +16,23 @@ import {
 } from '../validators/product.validator';
 import { createValidationError, validateRequest } from '../validators/validator.utils';
 
+function toGrpcProduct(product: Product): GrpcProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    quantity: product.quantity,
+    category: product.category,
+    created_at: product.createdAt,
+    updated_at: product.updatedAt,
+  };
+}
+
 export const productServiceImplementation = {
   GetProduct: async (
     call: grpc.ServerUnaryCall<GetProductRequestDto, GrpcProductResponse>,
-    callback: grpc.sendUnaryData<GrpcProductResponse>
+    callback: grpc.sendUnaryData<GrpcProductResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(GetProductRequestDto, call.request);
@@ -27,22 +41,8 @@ export const productServiceImplementation = {
         return;
       }
 
-      const { id } = call.request;
-      const result = await getProduct(id);
-      const response: GrpcProductResponse = {
-        product: {
-          id: result.id,
-          name: result.name,
-          description: result.description,
-          price: result.price,
-          quantity: result.quantity,
-          category: result.category,
-          created_at: result.createdAt,
-          updated_at: result.updatedAt,
-        },
-      };
-
-      callback(null, response);
+      const result = await getProduct(call.request.id);
+      callback(null, { product: toGrpcProduct(result) });
     } catch (error) {
       handleGrpcError(error, callback, 'GetProduct');
     }
@@ -50,7 +50,7 @@ export const productServiceImplementation = {
 
   CreateProduct: async (
     call: grpc.ServerUnaryCall<CreateProductRequest, GrpcProductResponse>,
-    callback: grpc.sendUnaryData<GrpcProductResponse>
+    callback: grpc.sendUnaryData<GrpcProductResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(CreateProductRequestDto, call.request);
@@ -60,26 +60,8 @@ export const productServiceImplementation = {
       }
 
       const { name, description, price, quantity, category } = call.request;
-      const result = await createProduct({
-        name,
-        description,
-        price,
-        quantity,
-        category,
-      });
-      const response: GrpcProductResponse = {
-        product: {
-          id: result.id,
-          name: result.name,
-          description: result.description,
-          price: result.price,
-          quantity: result.quantity,
-          category: result.category,
-          created_at: result.createdAt,
-          updated_at: result.updatedAt,
-        },
-      };
-      callback(null, response);
+      const result = await createProduct({ name, description, price, quantity, category });
+      callback(null, { product: toGrpcProduct(result) });
     } catch (error) {
       handleGrpcError(error, callback, 'CreateProduct');
     }
@@ -87,7 +69,7 @@ export const productServiceImplementation = {
 
   SearchProducts: async (
     call: grpc.ServerUnaryCall<SearchProductsRequestDto, GrpcSearchProductsResponse>,
-    callback: grpc.sendUnaryData<GrpcSearchProductsResponse>
+    callback: grpc.sendUnaryData<GrpcSearchProductsResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(SearchProductsRequestDto, call.request);
@@ -105,23 +87,13 @@ export const productServiceImplementation = {
         page,
         pageSize: page_size,
       });
-      const grpcProducts: GrpcProduct[] = result.products.map(product => ({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        quantity: product.quantity,
-        category: product.category,
-        created_at: product.createdAt,
-        updated_at: product.updatedAt,
-      }));
-      const response: GrpcSearchProductsResponse = {
-        products: grpcProducts,
+
+      callback(null, {
+        products: result.products.map(toGrpcProduct),
         total_count: result.totalCount,
         page: page ?? 1,
         page_size: page_size ?? 10,
-      };
-      callback(null, response);
+      });
     } catch (error) {
       handleGrpcError(error, callback, 'SearchProducts');
     }

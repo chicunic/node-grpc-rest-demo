@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
-import { Response } from 'express';
+import type { Response } from 'express';
 
 import { createStructuredLogger } from '../config/logger';
 
@@ -7,61 +7,60 @@ export interface ErrorResponse {
   error: string;
 }
 
+type ErrorType = 'not_found' | 'invalid' | 'internal';
+
 const logger = createStructuredLogger('error-handler');
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Internal server error';
+}
+
+function classifyError(error: unknown): ErrorType {
+  if (!(error instanceof Error)) {
+    return 'internal';
+  }
+
+  const message = error.message.toLowerCase();
+
+  if (message.includes('not found')) {
+    return 'not_found';
+  }
+
+  if (message.includes('invalid')) {
+    return 'invalid';
+  }
+
+  return 'internal';
+}
+
+const HTTP_STATUS_MAP: Record<ErrorType, number> = {
+  not_found: 404,
+  invalid: 400,
+  internal: 500,
+};
+
+const GRPC_STATUS_MAP: Record<ErrorType, grpc.status> = {
+  not_found: grpc.status.NOT_FOUND,
+  invalid: grpc.status.INVALID_ARGUMENT,
+  internal: grpc.status.INTERNAL,
+};
 
 export function handleRouteError(error: unknown, res: Response<ErrorResponse>, context: string): void {
   logger.error(`Error in ${context}`, error instanceof Error ? error : { error });
 
-  if (error instanceof Error) {
-    // Check if error message indicates a not found scenario
-    if (error.message.includes('not found') || error.message.includes('Not found')) {
-      res.status(404).json({
-        error: error.message,
-      });
-      return;
-    }
+  const errorType = classifyError(error);
+  const status = HTTP_STATUS_MAP[errorType];
+  const message = getErrorMessage(error);
 
-    // Check if error message indicates invalid input
-    if (error.message.includes('invalid') || error.message.includes('Invalid')) {
-      res.status(400).json({
-        error: error.message,
-      });
-      return;
-    }
-  }
-
-  // Default to internal error
-  res.status(500).json({
-    error: error instanceof Error ? error.message : 'Internal server error',
-  });
+  res.status(status).json({ error: message });
 }
 
 export function handleGrpcError<T>(error: unknown, callback: grpc.sendUnaryData<T>, context: string): void {
   logger.error(`gRPC Error in ${context}`, error instanceof Error ? error : { error });
 
-  if (error instanceof Error) {
-    // Check if error message indicates a not found scenario
-    if (error.message.includes('not found') || error.message.includes('Not found')) {
-      callback({
-        code: grpc.status.NOT_FOUND,
-        message: error.message,
-      });
-      return;
-    }
+  const errorType = classifyError(error);
+  const code = GRPC_STATUS_MAP[errorType];
+  const message = getErrorMessage(error);
 
-    // Check if error message indicates invalid input
-    if (error.message.includes('invalid') || error.message.includes('Invalid')) {
-      callback({
-        code: grpc.status.INVALID_ARGUMENT,
-        message: error.message,
-      });
-      return;
-    }
-  }
-
-  // Default to internal error
-  callback({
-    code: grpc.status.INTERNAL,
-    message: error instanceof Error ? error.message : 'Internal server error',
-  });
+  callback({ code, message });
 }

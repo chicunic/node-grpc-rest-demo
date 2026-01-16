@@ -1,24 +1,32 @@
 /**
  * gRPC test server utilities
  */
+
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROTO_PATH = path.join(__dirname, '../../proto/example.proto');
+const USER_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/user.proto');
+const PRODUCT_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/product.proto');
 
-// Load proto file for client
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+// Load proto files for client
+const protoOptions: protoLoader.Options = {
   keepCase: true,
   longs: String,
   enums: String,
   defaults: true,
   oneofs: true,
-});
+};
 
-const example = (grpc.loadPackageDefinition(packageDefinition) as grpc.GrpcObject).example as grpc.GrpcObject;
+const userPackageDefinition = protoLoader.loadSync(USER_PROTO_PATH, protoOptions);
+const productPackageDefinition = protoLoader.loadSync(PRODUCT_PROTO_PATH, protoOptions);
+
+const userProto = (grpc.loadPackageDefinition(userPackageDefinition) as grpc.GrpcObject).api as grpc.GrpcObject;
+const productProto = (grpc.loadPackageDefinition(productPackageDefinition) as grpc.GrpcObject).api as grpc.GrpcObject;
+const v1User = userProto.v1 as grpc.GrpcObject;
+const v1Product = productProto.v1 as grpc.GrpcObject;
 
 export interface GrpcTestClient {
   productClient: grpc.Client;
@@ -48,13 +56,13 @@ export async function createGrpcTestClient(): Promise<GrpcTestClient> {
   const address = `127.0.0.1:${port}`;
 
   // Create clients
-  const productClient = new (example.ProductService as grpc.ServiceClientConstructor)(
+  const productClient = new (v1Product.ProductService as grpc.ServiceClientConstructor)(
     address,
-    grpc.credentials.createInsecure()
+    grpc.credentials.createInsecure(),
   );
-  const userClient = new (example.UserService as grpc.ServiceClientConstructor)(
+  const userClient = new (v1User.UserService as grpc.ServiceClientConstructor)(
     address,
-    grpc.credentials.createInsecure()
+    grpc.credentials.createInsecure(),
   );
 
   // Wait for clients to be ready
@@ -68,44 +76,32 @@ export async function createGrpcTestClient(): Promise<GrpcTestClient> {
   };
 }
 
-// Waits for a gRPC client to be ready
 function waitForClientReady(client: grpc.Client): Promise<void> {
   return new Promise((resolve, reject) => {
-    const deadline = new Date(Date.now() + 5000); // 5 second timeout
-    client.waitForReady(deadline, (err?: Error) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
+    const deadline = new Date(Date.now() + 5000);
+    client.waitForReady(deadline, (err) => (err ? reject(err) : resolve()));
   });
 }
 
-// Shuts down the test gRPC server and clients
 export async function shutdownGrpcTestClient(client: GrpcTestClient): Promise<void> {
-  // Close clients
   client.productClient.close();
   client.userClient.close();
 
-  // Shutdown server
-  return new Promise(resolve => {
-    client.server.tryShutdown(() => {
-      resolve();
-    });
+  return new Promise((resolve) => {
+    client.server.tryShutdown(() => resolve());
   });
 }
 
 type GrpcMethod<TReq, TRes> = (
   request: TReq,
-  callback: (error: grpc.ServiceError | null, response: TRes) => void
+  callback: (error: grpc.ServiceError | null, response: TRes) => void,
 ) => grpc.ClientUnaryCall;
 
 // Helper to promisify gRPC calls
 export function promisifyGrpcCall<TRequest, TResponse>(
   client: grpc.Client,
   method: string,
-  request: TRequest
+  request: TRequest,
 ): Promise<TResponse> {
   const fn = (client as grpc.Client & Record<string, GrpcMethod<TRequest, TResponse>>)[method];
   if (!fn) {
@@ -113,6 +109,6 @@ export function promisifyGrpcCall<TRequest, TResponse>(
   }
 
   return new Promise((resolve, reject) =>
-    fn.call(client, request, (error, response) => (error ? reject(error) : resolve(response)))
+    fn.call(client, request, (error, response) => (error ? reject(error) : resolve(response))),
   );
 }

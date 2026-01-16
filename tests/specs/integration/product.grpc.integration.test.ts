@@ -6,12 +6,12 @@
 import * as grpc from '@grpc/grpc-js';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 
-import { GrpcProductResponse, GrpcSearchProductsResponse } from '../../../src/types/product.types';
+import type { GrpcProductResponse, GrpcSearchProductsResponse } from '../../../src/types/product.types';
 import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_PRODUCT } from '../../utils/data';
 import { expectValidISOString, expectValidUUID } from '../../utils/helpers';
 import {
-  GrpcTestClient,
   createGrpcTestClient,
+  type GrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
 } from '../../utils/server.grpc';
@@ -36,7 +36,7 @@ describe('Product - gRPC Integration', () => {
       const createResponse = await promisifyGrpcCall<typeof createRequest, GrpcProductResponse>(
         grpcClient.productClient,
         'CreateProduct',
-        createRequest
+        createRequest,
       );
 
       expect(createResponse).toBeDefined();
@@ -59,7 +59,7 @@ describe('Product - gRPC Integration', () => {
       const createResponse = await promisifyGrpcCall<typeof createRequest, GrpcProductResponse>(
         grpcClient.productClient,
         'CreateProduct',
-        createRequest
+        createRequest,
       );
       const productId = createResponse.product.id;
 
@@ -68,7 +68,7 @@ describe('Product - gRPC Integration', () => {
       const getResponse = await promisifyGrpcCall<typeof getRequest, GrpcProductResponse>(
         grpcClient.productClient,
         'GetProduct',
-        getRequest
+        getRequest,
       );
 
       expect(getResponse).toBeDefined();
@@ -115,7 +115,7 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response).toBeDefined();
@@ -136,7 +136,7 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toBeInstanceOf(Array);
@@ -156,13 +156,13 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toBeInstanceOf(Array);
 
       // Check if results contain 'iPhone'
-      response.products.forEach(product => {
+      response.products.forEach((product) => {
         const productString = JSON.stringify(product).toLowerCase();
         expect(productString).toContain(query.toLowerCase());
       });
@@ -179,13 +179,13 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toBeInstanceOf(Array);
 
       // Check if all results are in Books category
-      response.products.forEach(product => {
+      response.products.forEach((product) => {
         expect(product.category).toBe(category);
       });
       expect(response.products.length).toBeGreaterThanOrEqual(3);
@@ -204,13 +204,13 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toBeInstanceOf(Array);
 
       // Check if all results are within price range
-      response.products.forEach(product => {
+      response.products.forEach((product) => {
         expect(product.price).toBeGreaterThanOrEqual(minPrice);
         expect(product.price).toBeLessThanOrEqual(maxPrice);
       });
@@ -229,13 +229,13 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toBeInstanceOf(Array);
 
       // Check if all results match both filters
-      response.products.forEach(product => {
+      response.products.forEach((product) => {
         expect(product.category).toBe(category);
         expect(product.price).toBeGreaterThanOrEqual(minPrice);
       });
@@ -252,7 +252,7 @@ describe('Product - gRPC Integration', () => {
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
         'SearchProducts',
-        request
+        request,
       );
 
       expect(response.products).toEqual([]);

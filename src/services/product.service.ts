@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { CreateProductRequest, Product, SearchProductsQuery, SearchProductsResponse } from '../types/product.types';
+import type {
+  CreateProductRequest,
+  Product,
+  SearchProductsQuery,
+  SearchProductsResponse,
+} from '../types/product.types';
 
 // In-memory storage for products
 const products = new Map<string, Product>();
@@ -15,9 +20,8 @@ export async function getProduct(id: string): Promise<Product> {
 
 export async function createProduct(data: CreateProductRequest): Promise<Product> {
   const now = new Date().toISOString();
-  const productId = uuidv4();
   const product: Product = {
-    id: productId,
+    id: uuidv4(),
     name: data.name,
     description: data.description,
     price: data.price,
@@ -32,30 +36,26 @@ export async function createProduct(data: CreateProductRequest): Promise<Product
 }
 
 export async function searchProducts(options: SearchProductsQuery): Promise<SearchProductsResponse> {
-  const page = options.page;
-  const pageSize = options.pageSize;
-  const query = options.query?.toLowerCase();
+  const { page, pageSize, query, category, minPrice, maxPrice } = options;
+  const queryLower = query?.toLowerCase();
 
   const productList = Array.from(products.values())
-    .filter(product => {
-      // Apply text query filter if specified
-      if (query) {
+    .filter((product) => {
+      if (queryLower) {
         const matchesQuery =
-          product.name.toLowerCase().includes(query) || product.description.toLowerCase().includes(query);
+          product.name.toLowerCase().includes(queryLower) || product.description.toLowerCase().includes(queryLower);
         if (!matchesQuery) return false;
       }
 
-      // Apply category filter if specified
-      if (options.category && product.category !== options.category) {
+      if (category && product.category !== category) {
         return false;
       }
 
-      // Apply price range filters if specified
-      if (options.minPrice !== undefined && product.price < options.minPrice) {
+      if (minPrice !== undefined && product.price < minPrice) {
         return false;
       }
 
-      if (options.maxPrice !== undefined && product.price > options.maxPrice) {
+      if (maxPrice !== undefined && product.price > maxPrice) {
         return false;
       }
 
@@ -63,12 +63,11 @@ export async function searchProducts(options: SearchProductsQuery): Promise<Sear
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const total = productList.length;
   const start = (page - 1) * pageSize;
 
   return {
     products: productList.slice(start, start + pageSize),
-    totalCount: total,
+    totalCount: productList.length,
     page,
     pageSize,
   };

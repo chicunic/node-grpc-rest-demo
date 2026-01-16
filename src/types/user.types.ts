@@ -1,4 +1,4 @@
-import { PaginationQuery, PaginationResponse } from './pagination.types';
+import type { PaginationQuery, PaginationResponse } from './pagination.types';
 
 // REST API interfaces
 export interface User {
@@ -54,18 +54,21 @@ export interface GrpcUser {
 
 export interface GrpcGetUserResponse {
   user: GrpcUser;
+  message: string;
 }
 
 export interface GrpcCreateUserResponse {
   user: GrpcUser;
+  message: string;
 }
 
 export interface GrpcUpdateUserResponse {
   user: GrpcUser;
+  message: string;
 }
 
 export interface GrpcDeleteUserResponse {
-  success: boolean;
+  message: string;
 }
 
 export interface GrpcListUsersResponse {
