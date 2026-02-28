@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 import type {
   CreateUserRequest,
@@ -6,7 +6,7 @@ import type {
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from '../types/user.types';
+} from "../types/user.types";
 
 // In-memory storage for users
 const users = new Map<string, User>();
@@ -14,7 +14,7 @@ const users = new Map<string, User>();
 export async function getUser(id: string): Promise<User> {
   const user = users.get(id);
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   return user;
 }
@@ -72,7 +72,7 @@ export async function listUsers(options: ListUsersQuery): Promise<ListUsersRespo
       if (!sortBy) return 0;
       const aValue = a[sortBy as keyof User];
       const bValue = b[sortBy as keyof User];
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
+      if (typeof aValue === "string" && typeof bValue === "string") {
         return aValue.localeCompare(bValue);
       }
       return 0;

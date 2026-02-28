@@ -1,6 +1,6 @@
-import * as grpc from '@grpc/grpc-js';
-import { plainToClass } from 'class-transformer';
-import { type ValidationError, validate } from 'class-validator';
+import * as grpc from "@grpc/grpc-js";
+import { plainToClass } from "class-transformer";
+import { type ValidationError, validate } from "class-validator";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -24,7 +24,7 @@ export async function validateRequest<T extends object>(dto: new () => T, reques
 function flattenValidationErrors(errors: ValidationError[]): string[] {
   const messages: string[] = [];
 
-  function extractMessages(error: ValidationError, prefix = ''): void {
+  function extractMessages(error: ValidationError, prefix = ""): void {
     const propertyPath = prefix ? `${prefix}.${error.property}` : error.property;
 
     if (error.constraints) {
@@ -48,7 +48,7 @@ function flattenValidationErrors(errors: ValidationError[]): string[] {
 }
 
 export function createValidationError(errors: string[]): grpc.ServiceError {
-  const message = `Invalid request parameters: ${errors.join(', ')}`;
+  const message = `Invalid request parameters: ${errors.join(", ")}`;
   const error = new Error(message);
   return Object.assign(error, {
     code: grpc.status.INVALID_ARGUMENT,

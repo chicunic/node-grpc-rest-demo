@@ -35,16 +35,21 @@ coverage/
 *.pid.lock
 .cache
 
-# AI tools
+# AI Agents
 .claude/
 .cursor/
-.aider*
+.windsurf/
 .codeium/
 .continue/
+.aider*
 .copilot/
-.gemini/
-.windsurf/
+.github/copilot/
+.tabnine/
+.cody/
 .augment/
+.devin/
+.v0/
+.gemini/
 .mcp.json
 
 # IDE

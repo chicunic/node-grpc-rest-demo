@@ -2,21 +2,19 @@
  * Product - gRPC Integration Tests
  * Tests complete gRPC service using real server implementation with minimal mocking
  */
-/* eslint-disable jest/no-conditional-expect */
-import * as grpc from '@grpc/grpc-js';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import * as grpc from "@grpc/grpc-js";
 
-import type { GrpcProductResponse, GrpcSearchProductsResponse } from '../../../src/types/product.types';
-import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_PRODUCT } from '../../utils/data';
-import { expectValidISOString, expectValidUUID } from '../../utils/helpers';
+import type { GrpcProductResponse, GrpcSearchProductsResponse } from "../../../src/types/product.types";
+import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_PRODUCT } from "../../utils/data";
+import { expectValidISOString, expectValidUUID } from "../../utils/helpers";
 import {
   createGrpcTestClient,
   type GrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
-} from '../../utils/server.grpc';
+} from "../../utils/server.grpc";
 
-describe('Product - gRPC Integration', () => {
+describe("Product - gRPC Integration", () => {
   let grpcClient: GrpcTestClient;
 
   beforeAll(async () => {
@@ -29,13 +27,13 @@ describe('Product - gRPC Integration', () => {
     }
   });
 
-  describe('CreateProduct - gRPC Integration', () => {
-    it('should create a new product successfully', async () => {
+  describe("CreateProduct - gRPC Integration", () => {
+    it("should create a new product successfully", async () => {
       const createRequest = TEST_PRODUCT;
 
       const createResponse = await promisifyGrpcCall<typeof createRequest, GrpcProductResponse>(
         grpcClient.productClient,
-        'CreateProduct',
+        "CreateProduct",
         createRequest,
       );
 
@@ -52,13 +50,13 @@ describe('Product - gRPC Integration', () => {
     });
   });
 
-  describe('GetProduct - gRPC Integration', () => {
-    it('should get a product by ID successfully', async () => {
+  describe("GetProduct - gRPC Integration", () => {
+    it("should get a product by ID successfully", async () => {
       // First create a product
       const createRequest = TEST_PRODUCT;
       const createResponse = await promisifyGrpcCall<typeof createRequest, GrpcProductResponse>(
         grpcClient.productClient,
-        'CreateProduct',
+        "CreateProduct",
         createRequest,
       );
       const productId = createResponse.product.id;
@@ -67,7 +65,7 @@ describe('Product - gRPC Integration', () => {
       const getRequest = { id: productId };
       const getResponse = await promisifyGrpcCall<typeof getRequest, GrpcProductResponse>(
         grpcClient.productClient,
-        'GetProduct',
+        "GetProduct",
         getRequest,
       );
 
@@ -81,32 +79,32 @@ describe('Product - gRPC Integration', () => {
       expect(getResponse.product.category).toBe(createRequest.category);
     });
 
-    it('should return NOT_FOUND for non-existent product', async () => {
+    it("should return NOT_FOUND for non-existent product", async () => {
       const notFoundRequest = { id: TEST_FAKE_UUID };
 
       try {
-        await promisifyGrpcCall(grpcClient.productClient, 'GetProduct', notFoundRequest);
-        throw new Error('Should have thrown an error');
+        await promisifyGrpcCall(grpcClient.productClient, "GetProduct", notFoundRequest);
+        throw new Error("Should have thrown an error");
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
         const grpcError = error as grpc.ServiceError;
         expect(grpcError.code).toBe(grpc.status.NOT_FOUND);
-        expect(grpcError.details).toContain('Product not found');
+        expect(grpcError.details).toContain("Product not found");
       }
     });
   });
 
-  describe('SearchProducts - gRPC Integration', () => {
+  describe("SearchProducts - gRPC Integration", () => {
     beforeAll(async () => {
       // Create multiple products for search testing
       const products = SEARCH_PRODUCTS;
 
       for (const product of products) {
-        await promisifyGrpcCall(grpcClient.productClient, 'CreateProduct', product);
+        await promisifyGrpcCall(grpcClient.productClient, "CreateProduct", product);
       }
     });
 
-    it('should search products with default pagination', async () => {
+    it("should search products with default pagination", async () => {
       const request = {
         page: TEST_PAGINATION.DEFAULT_PAGE,
         page_size: TEST_PAGINATION.DEFAULT_PAGE_SIZE,
@@ -114,7 +112,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -125,7 +123,7 @@ describe('Product - gRPC Integration', () => {
       expect(response.page_size).toBe(TEST_PAGINATION.DEFAULT_PAGE_SIZE);
     });
 
-    it('should support custom pagination', async () => {
+    it("should support custom pagination", async () => {
       const page = 2;
       const pageSize = 2;
       const request = {
@@ -135,7 +133,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -145,8 +143,8 @@ describe('Product - gRPC Integration', () => {
       expect(response.page_size).toBe(pageSize);
     });
 
-    it('should search products by query', async () => {
-      const query = 'iPhone';
+    it("should search products by query", async () => {
+      const query = "iPhone";
       const request = {
         query,
         page: TEST_PAGINATION.DEFAULT_PAGE,
@@ -155,7 +153,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -168,8 +166,8 @@ describe('Product - gRPC Integration', () => {
       });
     });
 
-    it('should filter products by category', async () => {
-      const category = 'Books';
+    it("should filter products by category", async () => {
+      const category = "Books";
       const request = {
         category,
         page: TEST_PAGINATION.DEFAULT_PAGE,
@@ -178,7 +176,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -191,7 +189,7 @@ describe('Product - gRPC Integration', () => {
       expect(response.products.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should filter products by price range', async () => {
+    it("should filter products by price range", async () => {
       const minPrice = 100;
       const maxPrice = 300;
       const request = {
@@ -203,7 +201,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -216,8 +214,8 @@ describe('Product - gRPC Integration', () => {
       });
     });
 
-    it('should combine multiple filters', async () => {
-      const category = 'Electronics';
+    it("should combine multiple filters", async () => {
+      const category = "Electronics";
       const minPrice = 800;
       const request = {
         category,
@@ -228,7 +226,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 
@@ -241,8 +239,8 @@ describe('Product - gRPC Integration', () => {
       });
     });
 
-    it('should return empty array for no matches', async () => {
-      const nonexistentQuery = 'NonExistentProductXYZ123';
+    it("should return empty array for no matches", async () => {
+      const nonexistentQuery = "NonExistentProductXYZ123";
       const request = {
         query: nonexistentQuery,
         page: TEST_PAGINATION.DEFAULT_PAGE,
@@ -251,7 +249,7 @@ describe('Product - gRPC Integration', () => {
 
       const response = await promisifyGrpcCall<typeof request, GrpcSearchProductsResponse>(
         grpcClient.productClient,
-        'SearchProducts',
+        "SearchProducts",
         request,
       );
 

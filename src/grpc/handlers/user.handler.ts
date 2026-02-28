@@ -1,6 +1,6 @@
-import type * as grpc from '@grpc/grpc-js';
+import type * as grpc from "@grpc/grpc-js";
 
-import { createUser, deleteUser, getUser, listUsers, updateUser } from '../../services/user.service';
+import { createUser, deleteUser, getUser, listUsers, updateUser } from "../../services/user.service";
 import type {
   GrpcCreateUserResponse,
   GrpcDeleteUserResponse,
@@ -9,16 +9,16 @@ import type {
   GrpcUpdateUserResponse,
   GrpcUser,
   User,
-} from '../../types/user.types';
-import { handleGrpcError } from '../../utils/error.handler';
+} from "../../types/user.types";
+import { handleGrpcError } from "../../utils/error.handler";
 import {
   CreateUserRequestDto,
   DeleteUserRequestDto,
   GetUserRequestDto,
   ListUsersRequestDto,
   UpdateUserRequestDto,
-} from '../validators/user.validator';
-import { createValidationError, validateRequest } from '../validators/validator.utils';
+} from "../validators/user.validator";
+import { createValidationError, validateRequest } from "../validators/validator.utils";
 
 function toGrpcUser(user: User): GrpcUser {
   return {
@@ -45,9 +45,9 @@ export const userServiceImplementation = {
       }
 
       const result = await getUser(call.request.id);
-      callback(null, { user: toGrpcUser(result), message: 'User retrieved successfully' });
+      callback(null, { user: toGrpcUser(result), message: "User retrieved successfully" });
     } catch (error) {
-      handleGrpcError(error, callback, 'GetUser');
+      handleGrpcError(error, callback, "GetUser");
     }
   },
 
@@ -64,9 +64,9 @@ export const userServiceImplementation = {
 
       const { username, email, full_name } = call.request;
       const result = await createUser({ username, email, fullName: full_name });
-      callback(null, { user: toGrpcUser(result), message: 'User created successfully' });
+      callback(null, { user: toGrpcUser(result), message: "User created successfully" });
     } catch (error) {
-      handleGrpcError(error, callback, 'CreateUser');
+      handleGrpcError(error, callback, "CreateUser");
     }
   },
 
@@ -89,9 +89,9 @@ export const userServiceImplementation = {
       if (is_active !== undefined) updateData.isActive = is_active;
 
       const result = await updateUser(id, updateData);
-      callback(null, { user: toGrpcUser(result), message: 'User updated successfully' });
+      callback(null, { user: toGrpcUser(result), message: "User updated successfully" });
     } catch (error) {
-      handleGrpcError(error, callback, 'UpdateUser');
+      handleGrpcError(error, callback, "UpdateUser");
     }
   },
 
@@ -107,9 +107,9 @@ export const userServiceImplementation = {
       }
 
       await deleteUser(call.request.id);
-      callback(null, { message: 'User deleted successfully' });
+      callback(null, { message: "User deleted successfully" });
     } catch (error) {
-      handleGrpcError(error, callback, 'DeleteUser');
+      handleGrpcError(error, callback, "DeleteUser");
     }
   },
 
@@ -139,7 +139,7 @@ export const userServiceImplementation = {
         page_size: page_size ?? 10,
       });
     } catch (error) {
-      handleGrpcError(error, callback, 'ListUsers');
+      handleGrpcError(error, callback, "ListUsers");
     }
   },
 };

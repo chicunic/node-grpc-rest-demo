@@ -2,14 +2,14 @@
  * gRPC test server utilities
  */
 
-import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const USER_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/user.proto');
-const PRODUCT_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/product.proto');
+const USER_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/user.proto");
+const PRODUCT_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/product.proto");
 
 // Load proto files for client
 const protoOptions: protoLoader.Options = {
@@ -39,12 +39,12 @@ export interface GrpcTestClient {
 // Uses the real gRPC server implementation for integration testing
 export async function createGrpcTestClient(): Promise<GrpcTestClient> {
   // Import the real gRPC server factory
-  const { createGrpcServer } = await import('../../src/grpc/server');
+  const { createGrpcServer } = await import("../../src/grpc/server");
   const server = createGrpcServer();
 
   // Start server on random port
   const port = await new Promise<number>((resolve, reject) => {
-    server.bindAsync('127.0.0.1:0', grpc.ServerCredentials.createInsecure(), (err, boundPort) => {
+    server.bindAsync("127.0.0.1:0", grpc.ServerCredentials.createInsecure(), (err, boundPort) => {
       if (err) {
         reject(err);
         return;

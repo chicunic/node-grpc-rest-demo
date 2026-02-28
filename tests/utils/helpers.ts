@@ -1,12 +1,11 @@
 /**
  * Test helper functions
  */
-import { expect } from '@jest/globals';
-import { isUUID } from 'class-validator';
-import type { Response } from 'supertest';
+import { isUUID } from "class-validator";
+import type { Response } from "supertest";
 
 export function expectValidUUID(uuid: string): void {
-  expect(isUUID(uuid, '4')).toBe(true);
+  expect(isUUID(uuid, "4")).toBe(true);
 }
 
 export function expectValidISOString(dateString: string): void {

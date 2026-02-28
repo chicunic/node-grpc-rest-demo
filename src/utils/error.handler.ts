@@ -1,36 +1,36 @@
-import * as grpc from '@grpc/grpc-js';
-import type { Response } from 'express';
+import * as grpc from "@grpc/grpc-js";
+import type { Response } from "express";
 
-import { createStructuredLogger } from '../config/logger';
+import { createStructuredLogger } from "../config/logger";
 
 export interface ErrorResponse {
   error: string;
 }
 
-type ErrorType = 'not_found' | 'invalid' | 'internal';
+type ErrorType = "not_found" | "invalid" | "internal";
 
-const logger = createStructuredLogger('error-handler');
+const logger = createStructuredLogger("error-handler");
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'Internal server error';
+  return error instanceof Error ? error.message : "Internal server error";
 }
 
 function classifyError(error: unknown): ErrorType {
   if (!(error instanceof Error)) {
-    return 'internal';
+    return "internal";
   }
 
   const message = error.message.toLowerCase();
 
-  if (message.includes('not found')) {
-    return 'not_found';
+  if (message.includes("not found")) {
+    return "not_found";
   }
 
-  if (message.includes('invalid')) {
-    return 'invalid';
+  if (message.includes("invalid")) {
+    return "invalid";
   }
 
-  return 'internal';
+  return "internal";
 }
 
 const HTTP_STATUS_MAP: Record<ErrorType, number> = {

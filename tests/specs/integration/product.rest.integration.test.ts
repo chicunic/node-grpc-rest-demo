@@ -2,12 +2,11 @@
  * Product - REST API Integration Tests
  * Tests complete REST service using real server implementation with minimal mocking
  */
-import { beforeAll, describe, expect, it } from '@jest/globals';
-import type express from 'express';
+import type express from "express";
 
-import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PRODUCT } from '../../utils/data';
-import { expectValidISOString, expectValidUUID, restAssert } from '../../utils/helpers';
-import { createCompleteTestApp, RestTestHelper } from '../../utils/server.rest';
+import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PRODUCT } from "../../utils/data";
+import { expectValidISOString, expectValidUUID, restAssert } from "../../utils/helpers";
+import { createCompleteTestApp, RestTestHelper } from "../../utils/server.rest";
 
 interface ProductData {
   name: string;
@@ -23,7 +22,7 @@ interface ProductResponse extends ProductData {
   updatedAt: string;
 }
 
-describe('Product - REST Integration', () => {
+describe("Product - REST Integration", () => {
   let app: express.Application;
   let helper: RestTestHelper;
 
@@ -32,10 +31,10 @@ describe('Product - REST Integration', () => {
     helper = new RestTestHelper(app);
   });
 
-  describe('CreateProduct - REST Integration', () => {
-    it('should create a new product successfully', async () => {
+  describe("CreateProduct - REST Integration", () => {
+    it("should create a new product successfully", async () => {
       const productData = TEST_PRODUCT;
-      const createResponse = await helper.post('/api/v1/products', productData);
+      const createResponse = await helper.post("/api/v1/products", productData);
 
       restAssert.expectSuccess(createResponse, 201);
       expect(createResponse.body.id).toBeDefined();
@@ -50,11 +49,11 @@ describe('Product - REST Integration', () => {
     });
   });
 
-  describe('GetProduct - REST Integration', () => {
-    it('should get a product by ID successfully', async () => {
+  describe("GetProduct - REST Integration", () => {
+    it("should get a product by ID successfully", async () => {
       // First create a product
       const productData = TEST_PRODUCT;
-      const createResponse = await helper.post('/api/v1/products', productData);
+      const createResponse = await helper.post("/api/v1/products", productData);
       const productId = createResponse.body.id;
 
       // Then get the product
@@ -69,25 +68,25 @@ describe('Product - REST Integration', () => {
       expect(getResponse.body.category).toBe(productData.category);
     });
 
-    it('should return 404 for non-existent product', async () => {
+    it("should return 404 for non-existent product", async () => {
       const notFoundResponse = await helper.get(`/api/v1/products/${TEST_FAKE_UUID}`);
 
-      restAssert.expectError(notFoundResponse, 404, 'Product not found');
+      restAssert.expectError(notFoundResponse, 404, "Product not found");
     });
   });
 
-  describe('SearchProducts - REST Integration', () => {
+  describe("SearchProducts - REST Integration", () => {
     beforeAll(async () => {
       // Create multiple products for search testing
       const products = SEARCH_PRODUCTS;
 
       for (const product of products) {
-        await helper.post('/api/v1/products', product);
+        await helper.post("/api/v1/products", product);
       }
     });
 
-    it('should search products with default pagination', async () => {
-      const response = await helper.get('/api/v1/products?page=1&pageSize=10');
+    it("should search products with default pagination", async () => {
+      const response = await helper.get("/api/v1/products?page=1&pageSize=10");
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
@@ -96,7 +95,7 @@ describe('Product - REST Integration', () => {
       expect(response.body.pageSize).toBe(10);
     });
 
-    it('should support custom pagination', async () => {
+    it("should support custom pagination", async () => {
       const page = 2;
       const pageSize = 2;
       const response = await helper.get(`/api/v1/products?page=${page}&pageSize=${pageSize}`);
@@ -108,8 +107,8 @@ describe('Product - REST Integration', () => {
       expect(response.body.pageSize).toBe(pageSize);
     });
 
-    it('should search products by query', async () => {
-      const query = 'iPhone';
+    it("should search products by query", async () => {
+      const query = "iPhone";
       const response = await helper.get(`/api/v1/products?query=${query}&page=1&pageSize=10`);
 
       restAssert.expectSuccess(response, 200);
@@ -122,8 +121,8 @@ describe('Product - REST Integration', () => {
       });
     });
 
-    it('should filter products by category', async () => {
-      const category = 'Books';
+    it("should filter products by category", async () => {
+      const category = "Books";
       const response = await helper.get(`/api/v1/products?category=${category}&page=1&pageSize=10`);
 
       restAssert.expectSuccess(response, 200);
@@ -136,7 +135,7 @@ describe('Product - REST Integration', () => {
       expect(response.body.products.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should filter products by price range', async () => {
+    it("should filter products by price range", async () => {
       const minPrice = 100;
       const maxPrice = 300;
       const response = await helper.get(
@@ -153,8 +152,8 @@ describe('Product - REST Integration', () => {
       });
     });
 
-    it('should combine multiple filters', async () => {
-      const category = 'Electronics';
+    it("should combine multiple filters", async () => {
+      const category = "Electronics";
       const minPrice = 800;
       const response = await helper.get(
         `/api/v1/products?category=${category}&minPrice=${minPrice}&page=1&pageSize=10`,
@@ -170,8 +169,8 @@ describe('Product - REST Integration', () => {
       });
     });
 
-    it('should return empty array for no matches', async () => {
-      const nonexistentQuery = 'NonExistentProductXYZ123';
+    it("should return empty array for no matches", async () => {
+      const nonexistentQuery = "NonExistentProductXYZ123";
       const response = await helper.get(`/api/v1/products?query=${nonexistentQuery}&page=1&pageSize=10`);
 
       restAssert.expectSuccess(response, 200);

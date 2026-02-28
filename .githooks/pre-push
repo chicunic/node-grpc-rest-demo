@@ -24,18 +24,11 @@ do
 
     echo -e "${BLUE}🚀 Pre-push checks for branch: ${branch}${NC}"
 
-    # Type checking
-    echo -e "${YELLOW}🔍 Running type check...${NC}"
-    if ! pnpm run typecheck; then
-        echo -e "${RED}❌ Type check failed!${NC}"
-        exit 1
-    fi
-
-    # Linting and formatting
-    echo -e "${YELLOW}🔍 Running lint and format check...${NC}"
-    if ! pnpm run lint; then
-        echo -e "${RED}❌ Lint check failed!${NC}"
-        echo -e "${YELLOW}💡 Run 'pnpm run lint:fix' to auto-fix issues${NC}"
+    # Type check + Biome lint/format
+    echo -e "${YELLOW}🔍 Running check (type check + biome)...${NC}"
+    if ! pnpm run check; then
+        echo -e "${RED}❌ Check failed!${NC}"
+        echo -e "${YELLOW}💡 Run 'pnpm run fix' to auto-fix issues${NC}"
         exit 1
     fi
 

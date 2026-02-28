@@ -1,20 +1,20 @@
-import path, { dirname } from 'node:path';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import { ReflectionService } from '@grpc/reflection';
-import dotenv from 'dotenv';
-import { HealthImplementation } from 'grpc-health-check';
-import 'reflect-metadata';
-import { fileURLToPath } from 'node:url';
+import path, { dirname } from "node:path";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import { ReflectionService } from "@grpc/reflection";
+import dotenv from "dotenv";
+import { HealthImplementation } from "grpc-health-check";
+import "reflect-metadata";
+import { fileURLToPath } from "node:url";
 
-import { createStructuredLogger } from '../config/logger';
-import { productServiceImplementation } from './handlers/product.handler';
-import { userServiceImplementation } from './handlers/user.handler';
+import { createStructuredLogger } from "../config/logger";
+import { productServiceImplementation } from "./handlers/product.handler";
+import { userServiceImplementation } from "./handlers/user.handler";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const USER_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/user.proto');
-const PRODUCT_PROTO_PATH = path.join(__dirname, '../../api/proto/v1/product.proto');
-const logger = createStructuredLogger('grpc-server');
+const USER_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/user.proto");
+const PRODUCT_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/product.proto");
+const logger = createStructuredLogger("grpc-server");
 
 // Load proto files
 const protoOptions: protoLoader.Options = {
@@ -44,9 +44,9 @@ export function createGrpcServer(): grpc.Server {
 
   // Add health check service
   const healthImpl = new HealthImplementation();
-  healthImpl.setStatus('', 'SERVING');
-  healthImpl.setStatus('api.v1.UserService', 'SERVING');
-  healthImpl.setStatus('api.v1.ProductService', 'SERVING');
+  healthImpl.setStatus("", "SERVING");
+  healthImpl.setStatus("api.v1.UserService", "SERVING");
+  healthImpl.setStatus("api.v1.ProductService", "SERVING");
 
   healthImpl.addToServer(server);
 
@@ -83,18 +83,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   dotenv.config();
 
   // Set default NODE_ENV if not specified
-  process.env.NODE_ENV ??= 'development';
+  process.env.NODE_ENV ??= "development";
 
   const port = process.env.PORT ?? 8080;
 
-  logger.info('Starting gRPC server...');
+  logger.info("Starting gRPC server...");
 
   startGrpcServer(Number(port))
     .then(() => {
       logger.info(`gRPC server started successfully on port ${port}`);
     })
     .catch((error) => {
-      logger.error('Failed to start gRPC server', error);
+      logger.error("Failed to start gRPC server", error);
       process.exit(1);
     });
 }

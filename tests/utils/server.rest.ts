@@ -2,8 +2,8 @@
  * REST API test server utilities
  */
 
-import express from 'express';
-import request, { type Response } from 'supertest';
+import express from "express";
+import request, { type Response } from "supertest";
 
 function createTestApp(): express.Application {
   const app = express();
@@ -23,7 +23,7 @@ function addErrorHandling(app: express.Application): void {
         res.status(err.status).json({ error: err.message, details: err.errors });
         return;
       }
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     },
   );
 }
@@ -31,15 +31,15 @@ function addErrorHandling(app: express.Application): void {
 export async function createCompleteTestApp(): Promise<express.Application> {
   const app = createTestApp();
 
-  const { productRoutes } = await import('../../src/routes/product.route');
-  const { userRoutes } = await import('../../src/routes/user.route');
+  const { productRoutes } = await import("../../src/routes/product.route");
+  const { userRoutes } = await import("../../src/routes/user.route");
 
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  app.use('/api/v1', productRoutes);
-  app.use('/api/v1', userRoutes);
+  app.use("/api/v1", productRoutes);
+  app.use("/api/v1", userRoutes);
 
   addErrorHandling(app);
   return app;

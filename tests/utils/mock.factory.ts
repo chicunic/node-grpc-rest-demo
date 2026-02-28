@@ -1,12 +1,8 @@
 /**
  * Mock Factory Utilities
  */
-import { jest } from '@jest/globals';
+import { vi } from "vitest";
 
-export function createJestMock(): jest.Mock {
-  return jest.fn();
-}
-
-export function createModuleMock(modulePath: string, implementations: Record<string, unknown>): typeof jest {
-  return jest.unstable_mockModule(modulePath, () => implementations);
+export function createMock(): ReturnType<typeof vi.fn> {
+  return vi.fn();
 }

@@ -1,30 +1,30 @@
-import { type Request, type Response, Router } from 'express';
+import { type Request, type Response, Router } from "express";
 
-import { createProduct, getProduct, searchProducts } from '../services/product.service';
+import { createProduct, getProduct, searchProducts } from "../services/product.service";
 import type {
   CreateProductRequest,
   GetProductParams,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from '../types/product.types';
-import { type ErrorResponse, handleRouteError } from '../utils/error.handler';
+} from "../types/product.types";
+import { type ErrorResponse, handleRouteError } from "../utils/error.handler";
 
 const router = Router();
 
 // Get product by ID
-router.get('/products/:id', async (req: Request<GetProductParams>, res: Response<Product | ErrorResponse>) => {
+router.get("/products/:id", async (req: Request<GetProductParams>, res: Response<Product | ErrorResponse>) => {
   try {
     const { id } = req.params;
     const result = await getProduct(id);
     res.status(200).json(result);
   } catch (error) {
-    handleRouteError(error, res, 'GET /products/:id endpoint');
+    handleRouteError(error, res, "GET /products/:id endpoint");
   }
 });
 
 // Create new product
-router.post('/products', async (req: Request<CreateProductRequest>, res: Response<Product | ErrorResponse>) => {
+router.post("/products", async (req: Request<CreateProductRequest>, res: Response<Product | ErrorResponse>) => {
   try {
     const { name, description, price, quantity, category } = req.body;
     const product = await createProduct({
@@ -36,13 +36,13 @@ router.post('/products', async (req: Request<CreateProductRequest>, res: Respons
     });
     res.status(201).json(product);
   } catch (error) {
-    handleRouteError(error, res, 'POST /products endpoint');
+    handleRouteError(error, res, "POST /products endpoint");
   }
 });
 
 // Search products
 router.get(
-  '/products',
+  "/products",
   async (
     req: Request<unknown, unknown, unknown, SearchProductsQuery>,
     res: Response<SearchProductsResponse | ErrorResponse>,
@@ -59,7 +59,7 @@ router.get(
       });
       res.json(result);
     } catch (error) {
-      handleRouteError(error, res, 'GET /products endpoint');
+      handleRouteError(error, res, "GET /products endpoint");
     }
   },
 );

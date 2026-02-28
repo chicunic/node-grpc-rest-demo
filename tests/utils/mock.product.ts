@@ -1,21 +1,21 @@
 /**
  * Product Service Mock Utilities
  */
-import type { jest } from '@jest/globals';
+import type { Mock } from "vitest";
 
 import type {
   CreateProductRequest,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from '../../src/types/product.types';
-import { MOCK_PRODUCT_RESPONSE } from './data';
-import { createJestMock, createModuleMock } from './mock.factory';
+} from "../../src/types/product.types";
+import { MOCK_PRODUCT_RESPONSE } from "./data";
+import { createMock } from "./mock.factory";
 
 export const mockProductService = {
-  createProduct: createJestMock() as jest.Mock<(data: CreateProductRequest) => Promise<Product>>,
-  getProduct: createJestMock() as jest.Mock<(id: string) => Promise<Product>>,
-  searchProducts: createJestMock() as jest.Mock<(options: SearchProductsQuery) => Promise<SearchProductsResponse>>,
+  createProduct: createMock() as Mock<(data: CreateProductRequest) => Promise<Product>>,
+  getProduct: createMock() as Mock<(id: string) => Promise<Product>>,
+  searchProducts: createMock() as Mock<(options: SearchProductsQuery) => Promise<SearchProductsResponse>>,
 
   setup(): void {
     this.createProduct.mockResolvedValue(MOCK_PRODUCT_RESPONSE);
@@ -34,11 +34,3 @@ export const mockProductService = {
     this.searchProducts.mockReset();
   },
 };
-
-export function enableProductServiceMock(): void {
-  createModuleMock('../../src/services/product.service', {
-    createProduct: mockProductService.createProduct,
-    getProduct: mockProductService.getProduct,
-    searchProducts: mockProductService.searchProducts,
-  });
-}

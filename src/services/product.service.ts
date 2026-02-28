@@ -1,11 +1,11 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 import type {
   CreateProductRequest,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from '../types/product.types';
+} from "../types/product.types";
 
 // In-memory storage for products
 const products = new Map<string, Product>();
@@ -13,7 +13,7 @@ const products = new Map<string, Product>();
 export async function getProduct(id: string): Promise<Product> {
   const product = products.get(id);
   if (!product) {
-    throw new Error('Product not found');
+    throw new Error("Product not found");
   }
   return product;
 }

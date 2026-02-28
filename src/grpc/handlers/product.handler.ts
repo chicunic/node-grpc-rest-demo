@@ -1,20 +1,20 @@
-import type * as grpc from '@grpc/grpc-js';
+import type * as grpc from "@grpc/grpc-js";
 
-import { createProduct, getProduct, searchProducts } from '../../services/product.service';
+import { createProduct, getProduct, searchProducts } from "../../services/product.service";
 import type {
   CreateProductRequest,
   GrpcProduct,
   GrpcProductResponse,
   GrpcSearchProductsResponse,
   Product,
-} from '../../types/product.types';
-import { handleGrpcError } from '../../utils/error.handler';
+} from "../../types/product.types";
+import { handleGrpcError } from "../../utils/error.handler";
 import {
   CreateProductRequestDto,
   GetProductRequestDto,
   SearchProductsRequestDto,
-} from '../validators/product.validator';
-import { createValidationError, validateRequest } from '../validators/validator.utils';
+} from "../validators/product.validator";
+import { createValidationError, validateRequest } from "../validators/validator.utils";
 
 function toGrpcProduct(product: Product): GrpcProduct {
   return {
@@ -44,7 +44,7 @@ export const productServiceImplementation = {
       const result = await getProduct(call.request.id);
       callback(null, { product: toGrpcProduct(result) });
     } catch (error) {
-      handleGrpcError(error, callback, 'GetProduct');
+      handleGrpcError(error, callback, "GetProduct");
     }
   },
 
@@ -63,7 +63,7 @@ export const productServiceImplementation = {
       const result = await createProduct({ name, description, price, quantity, category });
       callback(null, { product: toGrpcProduct(result) });
     } catch (error) {
-      handleGrpcError(error, callback, 'CreateProduct');
+      handleGrpcError(error, callback, "CreateProduct");
     }
   },
 
@@ -95,7 +95,7 @@ export const productServiceImplementation = {
         page_size: page_size ?? 10,
       });
     } catch (error) {
-      handleGrpcError(error, callback, 'SearchProducts');
+      handleGrpcError(error, callback, "SearchProducts");
     }
   },
 };

@@ -2,13 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": ".",
     "rootDir": ".",
-    "types": ["jest", "node", "@types/jest"],
-    "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["tests/*"]
-    }
+    "types": ["vitest/globals", "node"],
+    "noUnusedLocals": false
   },
   "include": ["src/**/*", "tests/**/*"]
 }
