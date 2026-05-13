@@ -1,12 +1,8 @@
-/**
- * User Service - REST API Integration Tests
- * Tests complete REST service using real server implementation with minimal mocking
- */
 import type express from "express";
 
-import { LIST_USERS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_USER } from "../../utils/data";
-import { expectValidISOString, expectValidUUID, restAssert } from "../../utils/helpers";
-import { createCompleteTestApp, RestTestHelper } from "../../utils/server.rest";
+import { LIST_USERS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_USER } from "../../utils/data.js";
+import { expectValidISOString, expectValidUUID, restAssert } from "../../utils/helpers.js";
+import { RestTestHelper, createCompleteTestApp } from "../../utils/server.rest.js";
 
 interface UserData {
   username: string;

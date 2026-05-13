@@ -6,9 +6,8 @@ import type {
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from "../types/user.types";
+} from "../types/user.types.js";
 
-// In-memory storage for users
 const users = new Map<string, User>();
 
 export async function getUser(id: string): Promise<User> {
@@ -49,8 +48,7 @@ export async function updateUser(id: string, data: UpdateUserRequest): Promise<U
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
-  await getUser(id); // This will throw if user doesn't exist
-
+  await getUser(id); // throws if user doesn't exist
   users.delete(id);
   return true;
 }

@@ -1,7 +1,3 @@
-/**
- * REST API test server utilities
- */
-
 import express from "express";
 import request, { type Response } from "supertest";
 
@@ -31,8 +27,8 @@ function addErrorHandling(app: express.Application): void {
 export async function createCompleteTestApp(): Promise<express.Application> {
   const app = createTestApp();
 
-  const { productRoutes } = await import("../../src/routes/product.route");
-  const { userRoutes } = await import("../../src/routes/user.route");
+  const { productRoutes } = await import("../../src/routes/product.route.js");
+  const { userRoutes } = await import("../../src/routes/user.route.js");
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -56,7 +52,7 @@ export class RestTestHelper {
     url: string,
     data: string | object | undefined,
   ): Promise<Response & { body: TResponse }> {
-    return this.request.post(url).send(data) as Promise<Response & { body: TResponse }>;
+    return this.request.post(url).send(data);
   }
 
   async get(url: string): Promise<Response> {

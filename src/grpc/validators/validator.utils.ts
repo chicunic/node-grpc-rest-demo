@@ -2,10 +2,7 @@ import * as grpc from "@grpc/grpc-js";
 import { plainToClass } from "class-transformer";
 import { type ValidationError, validate } from "class-validator";
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors?: string[];
-}
+export type ValidationResult = { isValid: true } | { isValid: false; errors: string[] };
 
 export async function validateRequest<T extends object>(dto: new () => T, request: unknown): Promise<ValidationResult> {
   const instance = plainToClass(dto, request);

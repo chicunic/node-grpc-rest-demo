@@ -1,24 +1,22 @@
 import type * as grpc from "@grpc/grpc-js";
 
-import { createUser, deleteUser, getUser, listUsers, updateUser } from "../../services/user.service";
+import { createUser, deleteUser, getUser, listUsers, updateUser } from "../../services/user.service.js";
 import type {
-  GrpcCreateUserResponse,
   GrpcDeleteUserResponse,
-  GrpcGetUserResponse,
   GrpcListUsersResponse,
-  GrpcUpdateUserResponse,
   GrpcUser,
+  GrpcUserResponse,
   User,
-} from "../../types/user.types";
-import { handleGrpcError } from "../../utils/error.handler";
+} from "../../types/user.types.js";
+import { handleGrpcError } from "../../utils/error.handler.js";
 import {
   CreateUserRequestDto,
   DeleteUserRequestDto,
   GetUserRequestDto,
   ListUsersRequestDto,
   UpdateUserRequestDto,
-} from "../validators/user.validator";
-import { createValidationError, validateRequest } from "../validators/validator.utils";
+} from "../validators/user.validator.js";
+import { createValidationError, validateRequest } from "../validators/validator.utils.js";
 
 function toGrpcUser(user: User): GrpcUser {
   return {
@@ -34,13 +32,13 @@ function toGrpcUser(user: User): GrpcUser {
 
 export const userServiceImplementation = {
   GetUser: async (
-    call: grpc.ServerUnaryCall<GetUserRequestDto, GrpcGetUserResponse>,
-    callback: grpc.sendUnaryData<GrpcGetUserResponse>,
+    call: grpc.ServerUnaryCall<GetUserRequestDto, GrpcUserResponse>,
+    callback: grpc.sendUnaryData<GrpcUserResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(GetUserRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -52,13 +50,13 @@ export const userServiceImplementation = {
   },
 
   CreateUser: async (
-    call: grpc.ServerUnaryCall<CreateUserRequestDto, GrpcCreateUserResponse>,
-    callback: grpc.sendUnaryData<GrpcCreateUserResponse>,
+    call: grpc.ServerUnaryCall<CreateUserRequestDto, GrpcUserResponse>,
+    callback: grpc.sendUnaryData<GrpcUserResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(CreateUserRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -71,13 +69,13 @@ export const userServiceImplementation = {
   },
 
   UpdateUser: async (
-    call: grpc.ServerUnaryCall<UpdateUserRequestDto, GrpcUpdateUserResponse>,
-    callback: grpc.sendUnaryData<GrpcUpdateUserResponse>,
+    call: grpc.ServerUnaryCall<UpdateUserRequestDto, GrpcUserResponse>,
+    callback: grpc.sendUnaryData<GrpcUserResponse>,
   ): Promise<void> => {
     try {
       const validation = await validateRequest(UpdateUserRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -102,7 +100,7 @@ export const userServiceImplementation = {
     try {
       const validation = await validateRequest(DeleteUserRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -120,7 +118,7 @@ export const userServiceImplementation = {
     try {
       const validation = await validateRequest(ListUsersRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -135,8 +133,8 @@ export const userServiceImplementation = {
       callback(null, {
         users: result.users.map(toGrpcUser),
         total_count: result.totalCount,
-        page: page ?? 1,
-        page_size: page_size ?? 10,
+        page,
+        page_size,
       });
     } catch (error) {
       handleGrpcError(error, callback, "ListUsers");

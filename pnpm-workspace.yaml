@@ -4,3 +4,5 @@ allowBuilds:
 onlyBuiltDependencies:
   - '@bufbuild/buf'
   - protobufjs
+overrides:
+  '@tootallnate/once': ^3.0.1

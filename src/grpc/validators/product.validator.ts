@@ -1,6 +1,5 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
 
-// Get Product Request DTO (for ID validation)
 export class GetProductRequestDto {
   @IsNotEmpty({ message: "id is required" })
   @IsString({ message: "id must be a string" })
@@ -8,7 +7,6 @@ export class GetProductRequestDto {
   id!: string;
 }
 
-// Create Product Request DTO
 export class CreateProductRequestDto {
   @IsNotEmpty({ message: "name is required" })
   @IsString({ message: "name must be a string" })
@@ -38,7 +36,6 @@ export class CreateProductRequestDto {
   category!: string;
 }
 
-// Search Products Request DTO
 export class SearchProductsRequestDto {
   @IsOptional()
   @IsString({ message: "query must be a string" })

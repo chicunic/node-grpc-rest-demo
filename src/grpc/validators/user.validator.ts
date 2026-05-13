@@ -13,7 +13,6 @@ import {
   MinLength,
 } from "class-validator";
 
-// Get User Request DTO (for ID validation)
 export class GetUserRequestDto {
   @IsNotEmpty({ message: "id is required" })
   @IsString({ message: "id must be a string" })
@@ -21,7 +20,6 @@ export class GetUserRequestDto {
   id!: string;
 }
 
-// Create User Request DTO
 export class CreateUserRequestDto {
   @IsNotEmpty({ message: "username is required" })
   @IsString({ message: "username must be a string" })
@@ -40,7 +38,6 @@ export class CreateUserRequestDto {
   full_name!: string;
 }
 
-// Update User Request DTO
 export class UpdateUserRequestDto {
   @IsNotEmpty({ message: "id is required" })
   @IsString({ message: "id must be a string" })
@@ -69,7 +66,6 @@ export class UpdateUserRequestDto {
   is_active?: boolean;
 }
 
-// Delete User Request DTO (for ID validation)
 export class DeleteUserRequestDto {
   @IsNotEmpty({ message: "id is required" })
   @IsString({ message: "id must be a string" })
@@ -77,7 +73,6 @@ export class DeleteUserRequestDto {
   id!: string;
 }
 
-// List Users Request DTO
 export class ListUsersRequestDto {
   @IsOptional()
   @IsString({ message: "sort_by must be a string" })

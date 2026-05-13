@@ -50,7 +50,7 @@ Server endpoints:
 ### REST API (`/api/v1`)
 
 | Method | Endpoint           | Description                      |
-|--------|--------------------|----------------------------------|
+| ------ | ------------------ | -------------------------------- |
 | GET    | `/health`          | Health check                     |
 | POST   | `/users`           | Create user                      |
 | GET    | `/users`           | List users (with pagination)     |
@@ -65,10 +65,10 @@ Server endpoints:
 
 ### gRPC Services (port 8080)
 
-| Service        | Methods                                                                     |
-|----------------|-----------------------------------------------------------------------------|
-| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                      |
-| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts     |
+| Service        | Methods                                                                 |
+| -------------- | ----------------------------------------------------------------------- |
+| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                  |
+| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts |
 
 ## Testing gRPC with grpcurl
 
@@ -90,16 +90,19 @@ grpcurl -plaintext -d '{"username":"john","email":"john@example.com","full_name"
 ## Available Scripts
 
 ```bash
-pnpm run build          # Build TypeScript project
-pnpm run start          # Start REST API server
-pnpm run start:grpc     # Start gRPC server
-pnpm run dev            # Run REST API with hot reload
-pnpm run dev:grpc       # Run gRPC server with hot reload
-pnpm run test           # Run test suite
-pnpm run test:coverage  # Run tests with coverage report
-pnpm run typecheck      # Run TypeScript type checking
-pnpm run lint           # Run linter and formatter
-pnpm run lint:fix       # Auto-fix code issues
+pnpm run build             # Build TypeScript project (auto-runs proto:types via prebuild)
+pnpm run start             # Start REST API server (tsx)
+pnpm run start:grpc        # Start gRPC server (tsx)
+pnpm run start:prod        # Start REST API from compiled dist/
+pnpm run dev               # Run REST API with hot reload
+pnpm run dev:grpc          # Run gRPC server with hot reload
+pnpm run proto:types       # Generate TypeScript types from .proto files
+pnpm run test              # Run unit test suite
+pnpm run test:watch        # Run tests in watch mode
+pnpm run test:coverage     # Run tests with coverage report
+pnpm run test:integration  # Run integration test suite
+pnpm run check             # Type check + ESLint + Prettier check
+pnpm run fix               # Auto-fix ESLint + Prettier issues
 ```
 
 ## Project Structure

@@ -1,6 +1,5 @@
-import type { PaginationQuery, PaginationResponse } from "./pagination.types";
+import type { PaginationQuery, PaginationResponse } from "./pagination.types.js";
 
-// REST API interfaces
 export interface User {
   id: string;
   username: string;
@@ -41,7 +40,6 @@ export interface ListUsersResponse extends PaginationResponse {
   users: User[];
 }
 
-// gRPC interface
 export interface GrpcUser {
   id: string;
   username: string;
@@ -52,17 +50,7 @@ export interface GrpcUser {
   is_active: boolean;
 }
 
-export interface GrpcGetUserResponse {
-  user: GrpcUser;
-  message: string;
-}
-
-export interface GrpcCreateUserResponse {
-  user: GrpcUser;
-  message: string;
-}
-
-export interface GrpcUpdateUserResponse {
+export interface GrpcUserResponse {
   user: GrpcUser;
   message: string;
 }

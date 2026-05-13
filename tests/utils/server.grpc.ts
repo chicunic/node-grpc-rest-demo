@@ -1,17 +1,17 @@
-/**
- * gRPC test server utilities
- */
-
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 
+import type { ProductServiceClient } from "../../src/generated/proto/api/v1/ProductService.js";
+import type { UserServiceClient } from "../../src/generated/proto/api/v1/UserService.js";
+import type { ProtoGrpcType as ProductProtoGrpcType } from "../../src/generated/proto/product.js";
+import type { ProtoGrpcType as UserProtoGrpcType } from "../../src/generated/proto/user.js";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const USER_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/user.proto");
 const PRODUCT_PROTO_PATH = path.join(__dirname, "../../api/proto/v1/product.proto");
 
-// Load proto files for client
 const protoOptions: protoLoader.Options = {
   keepCase: true,
   longs: String,
@@ -23,26 +23,20 @@ const protoOptions: protoLoader.Options = {
 const userPackageDefinition = protoLoader.loadSync(USER_PROTO_PATH, protoOptions);
 const productPackageDefinition = protoLoader.loadSync(PRODUCT_PROTO_PATH, protoOptions);
 
-const userProto = (grpc.loadPackageDefinition(userPackageDefinition) as grpc.GrpcObject).api as grpc.GrpcObject;
-const productProto = (grpc.loadPackageDefinition(productPackageDefinition) as grpc.GrpcObject).api as grpc.GrpcObject;
-const v1User = userProto.v1 as grpc.GrpcObject;
-const v1Product = productProto.v1 as grpc.GrpcObject;
+const userProto = grpc.loadPackageDefinition(userPackageDefinition) as unknown as UserProtoGrpcType;
+const productProto = grpc.loadPackageDefinition(productPackageDefinition) as unknown as ProductProtoGrpcType;
 
 export interface GrpcTestClient {
-  productClient: grpc.Client;
-  userClient: grpc.Client;
+  productClient: ProductServiceClient;
+  userClient: UserServiceClient;
   server: grpc.Server;
   address: string;
 }
 
-// Creates a test gRPC server and clients for testing
-// Uses the real gRPC server implementation for integration testing
 export async function createGrpcTestClient(): Promise<GrpcTestClient> {
-  // Import the real gRPC server factory
-  const { createGrpcServer } = await import("../../src/grpc/server");
+  const { createGrpcServer } = await import("../../src/grpc/server.js");
   const server = createGrpcServer();
 
-  // Start server on random port
   const port = await new Promise<number>((resolve, reject) => {
     server.bindAsync("127.0.0.1:0", grpc.ServerCredentials.createInsecure(), (err, boundPort) => {
       if (err) {
@@ -53,33 +47,26 @@ export async function createGrpcTestClient(): Promise<GrpcTestClient> {
     });
   });
 
-  const address = `127.0.0.1:${port}`;
+  const address = `127.0.0.1:${port.toString()}`;
 
-  // Create clients
-  const productClient = new (v1Product.ProductService as grpc.ServiceClientConstructor)(
-    address,
-    grpc.credentials.createInsecure(),
-  );
-  const userClient = new (v1User.UserService as grpc.ServiceClientConstructor)(
-    address,
-    grpc.credentials.createInsecure(),
-  );
+  const productClient = new productProto.api.v1.ProductService(address, grpc.credentials.createInsecure());
+  const userClient = new userProto.api.v1.UserService(address, grpc.credentials.createInsecure());
 
-  // Wait for clients to be ready
   await Promise.all([waitForClientReady(productClient), waitForClientReady(userClient)]);
 
-  return {
-    productClient,
-    userClient,
-    server,
-    address,
-  };
+  return { productClient, userClient, server, address };
 }
 
 function waitForClientReady(client: grpc.Client): Promise<void> {
   return new Promise((resolve, reject) => {
     const deadline = new Date(Date.now() + 5000);
-    client.waitForReady(deadline, (err) => (err ? reject(err) : resolve()));
+    client.waitForReady(deadline, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
@@ -88,7 +75,9 @@ export async function shutdownGrpcTestClient(client: GrpcTestClient): Promise<vo
   client.userClient.close();
 
   return new Promise((resolve) => {
-    client.server.tryShutdown(() => resolve());
+    client.server.tryShutdown(() => {
+      resolve();
+    });
   });
 }
 
@@ -97,7 +86,6 @@ type GrpcMethod<TReq, TRes> = (
   callback: (error: grpc.ServiceError | null, response: TRes) => void,
 ) => grpc.ClientUnaryCall;
 
-// Helper to promisify gRPC calls
 export function promisifyGrpcCall<TRequest, TResponse>(
   client: grpc.Client,
   method: string,
@@ -109,6 +97,12 @@ export function promisifyGrpcCall<TRequest, TResponse>(
   }
 
   return new Promise((resolve, reject) =>
-    fn.call(client, request, (error, response) => (error ? reject(error) : resolve(response))),
+    fn.call(client, request, (error, response) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response);
+      }
+    }),
   );
 }

@@ -1,4 +1,3 @@
-import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -19,11 +18,6 @@ export default defineConfig({
         branches: 80,
         statements: 80,
       },
-    },
-
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@tests": path.resolve(__dirname, "./tests"),
     },
 
     testTimeout: 15000,

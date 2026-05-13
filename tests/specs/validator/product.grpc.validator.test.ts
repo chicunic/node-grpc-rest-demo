@@ -1,7 +1,3 @@
-/**
- * Product Service - gRPC Parameter Validator Tests
- * Tests parameter validation using real server implementation with service layer mocking
- */
 import * as grpc from "@grpc/grpc-js";
 import { vi } from "vitest";
 
@@ -9,16 +5,16 @@ import type {
   CreateProductRequestDto,
   GetProductRequestDto,
   SearchProductsRequestDto,
-} from "../../../src/grpc/validators/product.validator";
-import type { GrpcProductResponse, GrpcSearchProductsResponse } from "../../../src/types/product.types";
-import { TEST_FAKE_UUID } from "../../utils/data";
-import { mockProductService } from "../../utils/mock.index";
+} from "../../../src/grpc/validators/product.validator.js";
+import type { GrpcProductResponse, GrpcSearchProductsResponse } from "../../../src/types/product.types.js";
+import { TEST_FAKE_UUID } from "../../utils/data.js";
+import { mockProductService } from "../../utils/mock.product.js";
 import {
-  createGrpcTestClient,
   type GrpcTestClient,
+  createGrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
-} from "../../utils/server.grpc";
+} from "../../utils/server.grpc.js";
 
 vi.mock("../../../src/services/product.service", () => ({
   createProduct: mockProductService.createProduct,

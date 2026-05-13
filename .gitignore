@@ -1,63 +1,63 @@
-# Dependencies
-node_modules/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Build outputs
-dist/
-build/
+node_modules
+dist
+build
+*.local
 
-# TypeScript
+# TypeScript cache
 *.tsbuildinfo
+
+# Generated proto types
+src/generated/
 
 # Environment variables
 .env
-.env.*
-!.env.example
-
-# Logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
+.env.local
+.env.*.local
 
 # Cache
 .eslintcache
 .npm
+.cache
 
 # Coverage
 coverage/
 *.lcov
 .nyc_output
 
+# Editor directories and files
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# AI tools
+.claude/
+.gemini/
+.cursor/
+.aider*
+.continue/
+
 # Temporary files
+**/.temp/
+**/.local/
 *.tmp
 *.temp
 *.pid
 *.seed
 *.pid.lock
-.cache
-
-# AI Agents
-.claude/
-.cursor/
-.windsurf/
-.codeium/
-.continue/
-.aider*
-.copilot/
-.github/copilot/
-.tabnine/
-.cody/
-.augment/
-.devin/
-.v0/
-.gemini/
-.mcp.json
-
-# IDE
-.idea/
-*.swp
-*.swo
-*~
-
-# macOS
-.DS_Store
-Thumbs.db

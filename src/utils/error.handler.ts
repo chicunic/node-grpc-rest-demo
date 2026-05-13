@@ -1,7 +1,7 @@
 import * as grpc from "@grpc/grpc-js";
 import type { Response } from "express";
 
-import { createStructuredLogger } from "../config/logger";
+import { createStructuredLogger } from "../config/logger.js";
 
 export interface ErrorResponse {
   error: string;

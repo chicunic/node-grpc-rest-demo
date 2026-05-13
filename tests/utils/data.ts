@@ -1,10 +1,6 @@
-/**
- * Test data and constants for all services
- */
-import type { CreateProductRequest, Product } from "../../src/types/product.types";
-import type { CreateUserRequest, User } from "../../src/types/user.types";
+import type { CreateProductRequest, Product } from "../../src/types/product.types.js";
+import type { CreateUserRequest, User } from "../../src/types/user.types.js";
 
-// ===== COMMON CONSTANTS =====
 export const TEST_FAKE_UUID = "123e4567-e89b-4321-a456-426614174000";
 
 export const TEST_PAGINATION = {
@@ -13,16 +9,14 @@ export const TEST_PAGINATION = {
   SMALL_PAGE_SIZE: 2,
 };
 
-// Single product for CRUD tests
 export const TEST_PRODUCT = {
   name: "Test Product",
   description: "This is a test product",
   price: 100,
   quantity: 50,
   category: "Electronics",
-} as CreateProductRequest;
+};
 
-// Multiple products for search/list tests
 export const SEARCH_PRODUCTS = [
   {
     name: "iPhone 15 Pro",
@@ -68,7 +62,6 @@ export const SEARCH_PRODUCTS = [
   },
 ] as CreateProductRequest[];
 
-// Product Mock DB Data
 export const MOCK_PRODUCT_RESPONSE: Product = {
   id: "123e4567-e89b-4321-a456-426614174000",
   name: "Test Product",
@@ -80,14 +73,12 @@ export const MOCK_PRODUCT_RESPONSE: Product = {
   updatedAt: new Date().toISOString(),
 };
 
-// Single user for CRUD tests
 export const TEST_USER = {
   username: "testuser123",
   email: "test@example.com",
   fullName: "Test User",
-} as CreateUserRequest;
+};
 
-// Multiple users for list tests
 export const LIST_USERS = [
   {
     username: "alice",
@@ -106,7 +97,6 @@ export const LIST_USERS = [
   },
 ] as CreateUserRequest[];
 
-// User Mock DB Data
 export const MOCK_USER_RESPONSE: User = {
   id: "123e4567-e89b-4321-a456-426614174000",
   username: "testuser123",

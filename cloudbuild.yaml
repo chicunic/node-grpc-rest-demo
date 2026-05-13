@@ -1,10 +1,10 @@
 steps:
   # Step 1: Read configuration based on branch
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'read-config'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "read-config"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         # Install jq
         apt-get update && apt-get install -y jq
@@ -46,31 +46,31 @@ steps:
         echo "IMAGE_NAME=$$IMAGE_NAME" >> /workspace/build_vars
 
   # Step 2: Build Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'build'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         source /workspace/build_vars
         docker build -t $$IMAGE_NAME .
 
   # Step 3: Push Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'push'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         source /workspace/build_vars
         docker push $$IMAGE_NAME
 
   # Step 4: Deploy HTTP service to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'deploy-http'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "deploy-http"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         # Load variables
         source /workspace/build_vars
@@ -89,11 +89,11 @@ steps:
           --$$([ "$$ALLOW_UNAUTH" = "true" ] && echo "allow-unauthenticated" || echo "no-allow-unauthenticated")
 
   # Step 5: Deploy gRPC service to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'deploy-grpc'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "deploy-grpc"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         # Load variables
         source /workspace/build_vars

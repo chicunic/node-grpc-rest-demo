@@ -1,6 +1,3 @@
-/**
- * Test helper functions
- */
 import { isUUID } from "class-validator";
 import type { Response } from "supertest";
 

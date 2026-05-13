@@ -1,18 +1,16 @@
 import { type Request, type Response, Router } from "express";
 
-import { createProduct, getProduct, searchProducts } from "../services/product.service";
+import { createProduct, getProduct, searchProducts } from "../services/product.service.js";
 import type {
   CreateProductRequest,
   GetProductParams,
   Product,
-  SearchProductsQuery,
   SearchProductsResponse,
-} from "../types/product.types";
-import { type ErrorResponse, handleRouteError } from "../utils/error.handler";
+} from "../types/product.types.js";
+import { type ErrorResponse, handleRouteError } from "../utils/error.handler.js";
 
 const router = Router();
 
-// Get product by ID
 router.get("/products/:id", async (req: Request<GetProductParams>, res: Response<Product | ErrorResponse>) => {
   try {
     const { id } = req.params;
@@ -23,45 +21,33 @@ router.get("/products/:id", async (req: Request<GetProductParams>, res: Response
   }
 });
 
-// Create new product
-router.post("/products", async (req: Request<CreateProductRequest>, res: Response<Product | ErrorResponse>) => {
-  try {
-    const { name, description, price, quantity, category } = req.body;
-    const product = await createProduct({
-      name,
-      description,
-      price,
-      quantity,
-      category,
-    });
-    res.status(201).json(product);
-  } catch (error) {
-    handleRouteError(error, res, "POST /products endpoint");
-  }
-});
-
-// Search products
-router.get(
+router.post(
   "/products",
-  async (
-    req: Request<unknown, unknown, unknown, SearchProductsQuery>,
-    res: Response<SearchProductsResponse | ErrorResponse>,
-  ) => {
+  async (req: Request<unknown, unknown, CreateProductRequest>, res: Response<Product | ErrorResponse>) => {
     try {
-      const { query, category, minPrice, maxPrice, page, pageSize } = req.query;
-      const result = await searchProducts({
-        query,
-        category,
-        minPrice: minPrice ? Number(minPrice) : undefined,
-        maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        page: Number(page),
-        pageSize: Number(pageSize),
-      });
-      res.json(result);
+      const product = await createProduct(req.body);
+      res.status(201).json(product);
     } catch (error) {
-      handleRouteError(error, res, "GET /products endpoint");
+      handleRouteError(error, res, "POST /products endpoint");
     }
   },
 );
+
+router.get("/products", async (req: Request, res: Response<SearchProductsResponse | ErrorResponse>) => {
+  try {
+    const { query, category, minPrice, maxPrice, page, pageSize } = req.query;
+    const result = await searchProducts({
+      query: typeof query === "string" ? query : undefined,
+      category: typeof category === "string" ? category : undefined,
+      minPrice: typeof minPrice === "string" ? Number(minPrice) : undefined,
+      maxPrice: typeof maxPrice === "string" ? Number(maxPrice) : undefined,
+      page: Number(page),
+      pageSize: Number(pageSize),
+    });
+    res.json(result);
+  } catch (error) {
+    handleRouteError(error, res, "GET /products endpoint");
+  }
+});
 
 export const productRoutes: Router = router;

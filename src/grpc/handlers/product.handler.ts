@@ -1,20 +1,20 @@
 import type * as grpc from "@grpc/grpc-js";
 
-import { createProduct, getProduct, searchProducts } from "../../services/product.service";
+import { createProduct, getProduct, searchProducts } from "../../services/product.service.js";
 import type {
   CreateProductRequest,
   GrpcProduct,
   GrpcProductResponse,
   GrpcSearchProductsResponse,
   Product,
-} from "../../types/product.types";
-import { handleGrpcError } from "../../utils/error.handler";
+} from "../../types/product.types.js";
+import { handleGrpcError } from "../../utils/error.handler.js";
 import {
   CreateProductRequestDto,
   GetProductRequestDto,
   SearchProductsRequestDto,
-} from "../validators/product.validator";
-import { createValidationError, validateRequest } from "../validators/validator.utils";
+} from "../validators/product.validator.js";
+import { createValidationError, validateRequest } from "../validators/validator.utils.js";
 
 function toGrpcProduct(product: Product): GrpcProduct {
   return {
@@ -37,7 +37,7 @@ export const productServiceImplementation = {
     try {
       const validation = await validateRequest(GetProductRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -55,7 +55,7 @@ export const productServiceImplementation = {
     try {
       const validation = await validateRequest(CreateProductRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -74,7 +74,7 @@ export const productServiceImplementation = {
     try {
       const validation = await validateRequest(SearchProductsRequestDto, call.request);
       if (!validation.isValid) {
-        callback(createValidationError(validation.errors!));
+        callback(createValidationError(validation.errors));
         return;
       }
 
@@ -91,8 +91,8 @@ export const productServiceImplementation = {
       callback(null, {
         products: result.products.map(toGrpcProduct),
         total_count: result.totalCount,
-        page: page ?? 1,
-        page_size: page_size ?? 10,
+        page,
+        page_size,
       });
     } catch (error) {
       handleGrpcError(error, callback, "SearchProducts");

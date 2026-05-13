@@ -49,26 +49,26 @@ pnpm run dev:grpc
 
 ### REST API (`/api/v1`)
 
-| 方法   | 端点               | 描述                       |
-|--------|--------------------|----------------------------|
-| GET    | `/health`          | 健康检查                   |
-| POST   | `/users`           | 创建用户                   |
-| GET    | `/users`           | 用户列表（支持分页）       |
-| GET    | `/users/:id`       | 获取用户                   |
-| PUT    | `/users/:id`       | 更新用户                   |
-| DELETE | `/users/:id`       | 删除用户                   |
-| POST   | `/products`        | 创建产品                   |
-| GET    | `/products/:id`    | 获取产品                   |
-| PUT    | `/products/:id`    | 更新产品                   |
-| DELETE | `/products/:id`    | 删除产品                   |
-| GET    | `/products/search` | 搜索产品（多条件）         |
+| 方法   | 端点               | 描述                 |
+| ------ | ------------------ | -------------------- |
+| GET    | `/health`          | 健康检查             |
+| POST   | `/users`           | 创建用户             |
+| GET    | `/users`           | 用户列表（支持分页） |
+| GET    | `/users/:id`       | 获取用户             |
+| PUT    | `/users/:id`       | 更新用户             |
+| DELETE | `/users/:id`       | 删除用户             |
+| POST   | `/products`        | 创建产品             |
+| GET    | `/products/:id`    | 获取产品             |
+| PUT    | `/products/:id`    | 更新产品             |
+| DELETE | `/products/:id`    | 删除产品             |
+| GET    | `/products/search` | 搜索产品（多条件）   |
 
 ### gRPC 服务 (端口 8080)
 
-| 服务           | 方法                                                                        |
-|----------------|-----------------------------------------------------------------------------|
-| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                      |
-| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts     |
+| 服务           | 方法                                                                    |
+| -------------- | ----------------------------------------------------------------------- |
+| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                  |
+| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts |
 
 ## 使用 grpcurl 测试 gRPC
 
@@ -90,16 +90,19 @@ grpcurl -plaintext -d '{"username":"john","email":"john@example.com","full_name"
 ## 可用脚本
 
 ```bash
-pnpm run build          # 构建 TypeScript 项目
-pnpm run start          # 启动 REST API 服务器
-pnpm run start:grpc     # 启动 gRPC 服务器
-pnpm run dev            # 热重载运行 REST API
-pnpm run dev:grpc       # 热重载运行 gRPC 服务器
-pnpm run test           # 运行测试套件
-pnpm run test:coverage  # 运行带覆盖率报告的测试
-pnpm run typecheck      # 运行 TypeScript 类型检查
-pnpm run lint           # 运行代码检查和格式化
-pnpm run lint:fix       # 自动修复代码问题
+pnpm run build             # 构建 TypeScript 项目（prebuild 会自动跑 proto:types）
+pnpm run start             # 启动 REST API 服务器（tsx）
+pnpm run start:grpc        # 启动 gRPC 服务器（tsx）
+pnpm run start:prod        # 从编译后的 dist/ 启动 REST API
+pnpm run dev               # 热重载运行 REST API
+pnpm run dev:grpc          # 热重载运行 gRPC 服务器
+pnpm run proto:types       # 从 .proto 文件生成 TypeScript 类型
+pnpm run test              # 运行单元测试
+pnpm run test:watch        # 监听模式运行测试
+pnpm run test:coverage     # 运行带覆盖率报告的测试
+pnpm run test:integration  # 运行集成测试
+pnpm run check             # 类型检查 + ESLint + Prettier 检查
+pnpm run fix               # 自动修复 ESLint + Prettier 问题
 ```
 
 ## 项目结构

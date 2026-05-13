@@ -1,20 +1,18 @@
 import { type Request, type Response, Router } from "express";
 
-import { createUser, deleteUser, getUser, listUsers, updateUser } from "../services/user.service";
+import { createUser, deleteUser, getUser, listUsers, updateUser } from "../services/user.service.js";
 import type {
   CreateUserRequest,
   DeleteUserResponse,
   GetUserParams,
-  ListUsersQuery,
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from "../types/user.types";
-import { type ErrorResponse, handleRouteError } from "../utils/error.handler";
+} from "../types/user.types.js";
+import { type ErrorResponse, handleRouteError } from "../utils/error.handler.js";
 
 const router = Router();
 
-// Get user by ID
 router.get("/users/:id", async (req: Request<GetUserParams>, res: Response<User | ErrorResponse>) => {
   try {
     const { id } = req.params;
@@ -25,18 +23,18 @@ router.get("/users/:id", async (req: Request<GetUserParams>, res: Response<User 
   }
 });
 
-// Create new user
-router.post("/users", async (req: Request<CreateUserRequest>, res: Response<User | ErrorResponse>) => {
-  try {
-    const { username, email, fullName } = req.body;
-    const result = await createUser({ username, email, fullName });
-    res.status(201).json(result);
-  } catch (error) {
-    handleRouteError(error, res, "POST /users endpoint");
-  }
-});
+router.post(
+  "/users",
+  async (req: Request<unknown, unknown, CreateUserRequest>, res: Response<User | ErrorResponse>) => {
+    try {
+      const result = await createUser(req.body);
+      res.status(201).json(result);
+    } catch (error) {
+      handleRouteError(error, res, "POST /users endpoint");
+    }
+  },
+);
 
-// Update user
 router.put(
   "/users/:id",
   async (req: Request<GetUserParams, unknown, UpdateUserRequest>, res: Response<User | ErrorResponse>) => {
@@ -50,7 +48,6 @@ router.put(
   },
 );
 
-// Delete user
 router.delete("/users/:id", async (req: Request<GetUserParams>, res: Response<DeleteUserResponse | ErrorResponse>) => {
   try {
     const { id } = req.params;
@@ -61,23 +58,19 @@ router.delete("/users/:id", async (req: Request<GetUserParams>, res: Response<De
   }
 });
 
-// List users
-router.get(
-  "/users",
-  async (req: Request<unknown, unknown, unknown, ListUsersQuery>, res: Response<ListUsersResponse | ErrorResponse>) => {
-    try {
-      const { page, pageSize, sortBy, filter } = req.query;
-      const result = await listUsers({
-        page: Number(page),
-        pageSize: Number(pageSize),
-        sortBy,
-        filter,
-      });
-      res.status(200).json(result);
-    } catch (error) {
-      handleRouteError(error, res, "GET /users endpoint");
-    }
-  },
-);
+router.get("/users", async (req: Request, res: Response<ListUsersResponse | ErrorResponse>) => {
+  try {
+    const { page, pageSize, sortBy, filter } = req.query;
+    const result = await listUsers({
+      page: Number(page),
+      pageSize: Number(pageSize),
+      sortBy: typeof sortBy === "string" ? sortBy : undefined,
+      filter: typeof filter === "string" ? filter : undefined,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    handleRouteError(error, res, "GET /users endpoint");
+  }
+});
 
 export const userRoutes: Router = router;

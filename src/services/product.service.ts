@@ -5,9 +5,8 @@ import type {
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from "../types/product.types";
+} from "../types/product.types.js";
 
-// In-memory storage for products
 const products = new Map<string, Product>();
 
 export async function getProduct(id: string): Promise<Product> {

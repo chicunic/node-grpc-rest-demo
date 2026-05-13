@@ -1,6 +1,5 @@
-import type { PaginationQuery, PaginationResponse } from "./pagination.types";
+import type { PaginationQuery, PaginationResponse } from "./pagination.types.js";
 
-// REST API interfaces
 export interface Product {
   id: string;
   name: string;
@@ -35,7 +34,6 @@ export interface SearchProductsResponse extends PaginationResponse {
   products: Product[];
 }
 
-// gRPC interfaces
 export interface GrpcProduct {
   id: string;
   name: string;

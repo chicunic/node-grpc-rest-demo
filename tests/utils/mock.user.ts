@@ -1,7 +1,4 @@
-/**
- * User Service Mock Utilities
- */
-import type { Mock } from "vitest";
+import { vi } from "vitest";
 
 import type {
   CreateUserRequest,
@@ -9,16 +6,15 @@ import type {
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from "../../src/types/user.types";
-import { MOCK_USER_RESPONSE } from "./data";
-import { createMock } from "./mock.factory";
+} from "../../src/types/user.types.js";
+import { MOCK_USER_RESPONSE } from "./data.js";
 
 export const mockUserService = {
-  createUser: createMock() as Mock<(data: CreateUserRequest) => Promise<User>>,
-  getUser: createMock() as Mock<(id: string) => Promise<User>>,
-  updateUser: createMock() as Mock<(id: string, data: UpdateUserRequest) => Promise<User>>,
-  deleteUser: createMock() as Mock<(id: string) => Promise<boolean>>,
-  listUsers: createMock() as Mock<(options: ListUsersQuery) => Promise<ListUsersResponse>>,
+  createUser: vi.fn<(data: CreateUserRequest) => Promise<User>>(),
+  getUser: vi.fn<(id: string) => Promise<User>>(),
+  updateUser: vi.fn<(id: string, data: UpdateUserRequest) => Promise<User>>(),
+  deleteUser: vi.fn<(id: string) => Promise<boolean>>(),
+  listUsers: vi.fn<(options: ListUsersQuery) => Promise<ListUsersResponse>>(),
 
   setup(): void {
     this.createUser.mockResolvedValue(MOCK_USER_RESPONSE);

@@ -1,21 +1,17 @@
-/**
- * Product Service Mock Utilities
- */
-import type { Mock } from "vitest";
+import { vi } from "vitest";
 
 import type {
   CreateProductRequest,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from "../../src/types/product.types";
-import { MOCK_PRODUCT_RESPONSE } from "./data";
-import { createMock } from "./mock.factory";
+} from "../../src/types/product.types.js";
+import { MOCK_PRODUCT_RESPONSE } from "./data.js";
 
 export const mockProductService = {
-  createProduct: createMock() as Mock<(data: CreateProductRequest) => Promise<Product>>,
-  getProduct: createMock() as Mock<(id: string) => Promise<Product>>,
-  searchProducts: createMock() as Mock<(options: SearchProductsQuery) => Promise<SearchProductsResponse>>,
+  createProduct: vi.fn<(data: CreateProductRequest) => Promise<Product>>(),
+  getProduct: vi.fn<(id: string) => Promise<Product>>(),
+  searchProducts: vi.fn<(options: SearchProductsQuery) => Promise<SearchProductsResponse>>(),
 
   setup(): void {
     this.createProduct.mockResolvedValue(MOCK_PRODUCT_RESPONSE);

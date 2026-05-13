@@ -1,18 +1,14 @@
-/**
- * Product - gRPC Integration Tests
- * Tests complete gRPC service using real server implementation with minimal mocking
- */
 import * as grpc from "@grpc/grpc-js";
 
-import type { GrpcProductResponse, GrpcSearchProductsResponse } from "../../../src/types/product.types";
-import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_PRODUCT } from "../../utils/data";
-import { expectValidISOString, expectValidUUID } from "../../utils/helpers";
+import type { GrpcProductResponse, GrpcSearchProductsResponse } from "../../../src/types/product.types.js";
+import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_PRODUCT } from "../../utils/data.js";
+import { expectValidISOString, expectValidUUID } from "../../utils/helpers.js";
 import {
-  createGrpcTestClient,
   type GrpcTestClient,
+  createGrpcTestClient,
   promisifyGrpcCall,
   shutdownGrpcTestClient,
-} from "../../utils/server.grpc";
+} from "../../utils/server.grpc.js";
 
 describe("Product - gRPC Integration", () => {
   let grpcClient: GrpcTestClient;
@@ -82,15 +78,12 @@ describe("Product - gRPC Integration", () => {
     it("should return NOT_FOUND for non-existent product", async () => {
       const notFoundRequest = { id: TEST_FAKE_UUID };
 
-      try {
-        await promisifyGrpcCall(grpcClient.productClient, "GetProduct", notFoundRequest);
-        throw new Error("Should have thrown an error");
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        const grpcError = error as grpc.ServiceError;
-        expect(grpcError.code).toBe(grpc.status.NOT_FOUND);
-        expect(grpcError.details).toContain("Product not found");
-      }
+      await expect(
+        promisifyGrpcCall(grpcClient.productClient, "GetProduct", notFoundRequest),
+      ).rejects.toMatchObject({
+        code: grpc.status.NOT_FOUND,
+        details: expect.stringContaining("Product not found"),
+      });
     });
   });
 
