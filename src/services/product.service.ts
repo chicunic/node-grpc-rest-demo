@@ -1,18 +1,19 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import type {
   CreateProductRequest,
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from "../types/product.types.js";
+} from "../schemas/product.js";
+import { NotFoundError } from "../utils/errors.js";
 
 const products = new Map<string, Product>();
 
 export async function getProduct(id: string): Promise<Product> {
   const product = products.get(id);
   if (!product) {
-    throw new Error("Product not found");
+    throw new NotFoundError("Product not found");
   }
   return product;
 }
@@ -20,7 +21,7 @@ export async function getProduct(id: string): Promise<Product> {
 export async function createProduct(data: CreateProductRequest): Promise<Product> {
   const now = new Date().toISOString();
   const product: Product = {
-    id: uuidv4(),
+    id: randomUUID(),
     name: data.name,
     description: data.description,
     price: data.price,

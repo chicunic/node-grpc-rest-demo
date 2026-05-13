@@ -5,7 +5,7 @@ import type {
   Product,
   SearchProductsQuery,
   SearchProductsResponse,
-} from "../../src/types/product.types.js";
+} from "../../src/schemas/product.js";
 import { MOCK_PRODUCT_RESPONSE } from "./data.js";
 
 export const mockProductService = {

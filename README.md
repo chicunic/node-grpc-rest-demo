@@ -2,17 +2,18 @@
 
 A Node.js backend template demonstrating User and Product services with CRUD APIs, accessible via:
 
-1. **REST API** - Express framework
+1. **REST API** - Hono + Zod (OpenAPI 3.1) with Swagger UI
 2. **gRPC API** - Native gRPC with Protocol Buffers
 
 ## Features
 
 - **UserService**: Create, Read, Update, Delete, List users
-- **ProductService**: Create, Read, Update, Delete, Search products with filtering
+- **ProductService**: Create, Read, Search products with filtering
 - **Dual Protocol**: REST (HTTP/JSON) and gRPC support
-- **Protocol Buffers**: Single source of truth for API definitions
-- **Type Safety**: Full TypeScript support with class-validator
-- **Graceful Shutdown**: Proper signal handling
+- **REST schema-first**: Zod schemas drive validation, types, and OpenAPI docs
+- **gRPC contract-first**: Protocol Buffers + class-validator
+- **RFC 9457 errors**: Problem Details (`application/problem+json`) for REST errors
+- **Type Safety**: Full TypeScript support
 - **Thread-Safe**: Concurrent-safe in-memory storage
 
 ## Quick Start
@@ -42,6 +43,8 @@ pnpm run dev:grpc
 Server endpoints:
 
 - REST API: <http://localhost:8080/api/v1/>
+- OpenAPI JSON: <http://localhost:8080/openapi.json>
+- Swagger UI: <http://localhost:8080/docs>
 - gRPC: localhost:8080
 - Health check: <http://localhost:8080/health>
 
@@ -49,26 +52,37 @@ Server endpoints:
 
 ### REST API (`/api/v1`)
 
-| Method | Endpoint           | Description                      |
-| ------ | ------------------ | -------------------------------- |
-| GET    | `/health`          | Health check                     |
-| POST   | `/users`           | Create user                      |
-| GET    | `/users`           | List users (with pagination)     |
-| GET    | `/users/:id`       | Get user by ID                   |
-| PUT    | `/users/:id`       | Update user                      |
-| DELETE | `/users/:id`       | Delete user                      |
-| POST   | `/products`        | Create product                   |
-| GET    | `/products/:id`    | Get product by ID                |
-| PUT    | `/products/:id`    | Update product                   |
-| DELETE | `/products/:id`    | Delete product                   |
-| GET    | `/products/search` | Search products (multi-criteria) |
+| Method | Endpoint        | Description                  |
+| ------ | --------------- | ---------------------------- |
+| GET    | `/health`       | Health check                 |
+| GET    | `/openapi.json` | OpenAPI 3.1 schema           |
+| GET    | `/docs`         | Swagger UI                   |
+| POST   | `/users`        | Create user                  |
+| GET    | `/users`        | List users (with pagination) |
+| GET    | `/users/:id`    | Get user by ID               |
+| PUT    | `/users/:id`    | Update user                  |
+| DELETE | `/users/:id`    | Delete user                  |
+| POST   | `/products`     | Create product               |
+| GET    | `/products/:id` | Get product by ID            |
+| GET    | `/products`     | Search products (filters)    |
+
+Errors follow [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457):
+
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "User not found"
+}
+```
 
 ### gRPC Services (port 8080)
 
-| Service        | Methods                                                                 |
-| -------------- | ----------------------------------------------------------------------- |
-| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                  |
-| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts |
+| Service        | Methods                                                |
+| -------------- | ------------------------------------------------------ |
+| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers |
+| ProductService | CreateProduct, GetProduct, SearchProducts              |
 
 ## Testing gRPC with grpcurl
 
@@ -114,18 +128,21 @@ node-grpc-rest-demo/
 ├── src/
 │   ├── grpc/           # gRPC server and handlers
 │   │   ├── handlers/   # gRPC service implementations
-│   │   ├── validators/ # gRPC request validators
+│   │   ├── validators/ # gRPC request validators (class-validator)
 │   │   └── server.ts   # gRPC server setup
-│   ├── routes/         # REST API routes
-│   ├── services/       # Business logic layer
-│   ├── types/          # TypeScript type definitions
-│   ├── utils/          # Utility functions
-│   └── index.ts        # REST API entry point
+│   ├── routes/         # REST API routes (Hono + Zod)
+│   ├── schemas/        # Zod schemas (REST single source of truth)
+│   ├── services/       # Business logic layer (shared by REST + gRPC)
+│   ├── types/          # gRPC-specific TypeScript types
+│   ├── utils/          # Domain errors + gRPC error handler
+│   ├── config/         # Structured logger (Cloud Logging compatible)
+│   ├── config.ts       # Env vars validated by Zod
+│   ├── app.ts          # Hono app assembly + OpenAPI + Swagger UI
+│   └── index.ts        # REST API entry point (@hono/node-server)
 ├── tests/              # Test files
 │   ├── specs/
 │   │   ├── integration/ # Integration tests
-│   │   ├── unit/        # Unit tests
-│   │   └── validator/   # Validator tests
+│   │   └── validator/   # gRPC validator tests
 │   └── utils/          # Test utilities
 └── package.json        # Dependencies and scripts
 ```

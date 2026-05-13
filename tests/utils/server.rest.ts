@@ -1,69 +1,57 @@
-import express from "express";
-import request, { type Response } from "supertest";
+import app from "../../src/app.js";
+import type { RestResponse } from "./helpers.js";
 
-function createTestApp(): express.Application {
-  const app = express();
-  app.use(express.json());
+export type HonoApp = typeof app;
+
+export async function createCompleteTestApp(): Promise<HonoApp> {
   return app;
 }
 
-function addErrorHandling(app: express.Application): void {
-  app.use(
-    (
-      err: Error & { status?: number; errors?: unknown },
-      _req: express.Request,
-      res: express.Response,
-      _next: express.NextFunction,
-    ) => {
-      if (err.status && err.status < 500) {
-        res.status(err.status).json({ error: err.message, details: err.errors });
-        return;
-      }
-      res.status(500).json({ error: "Internal server error" });
-    },
-  );
+async function parseBody(res: Response): Promise<unknown> {
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("json")) {
+    return res.json();
+  }
+  const text = await res.text();
+  return text.length ? text : undefined;
 }
 
-export async function createCompleteTestApp(): Promise<express.Application> {
-  const app = createTestApp();
-
-  const { productRoutes } = await import("../../src/routes/product.route.js");
-  const { userRoutes } = await import("../../src/routes/user.route.js");
-
-  app.get("/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
-  });
-
-  app.use("/api/v1", productRoutes);
-  app.use("/api/v1", userRoutes);
-
-  addErrorHandling(app);
-  return app;
+async function toResponse<T>(res: Response): Promise<RestResponse<T>> {
+  return {
+    status: res.status,
+    body: (await parseBody(res)) as T,
+    headers: res.headers,
+  };
 }
 
 export class RestTestHelper {
-  constructor(private app: express.Application) {}
+  constructor(private app: HonoApp) {}
 
-  get request(): ReturnType<typeof request> {
-    return request(this.app);
+  async get<T = unknown>(url: string): Promise<RestResponse<T>> {
+    return toResponse<T>(await this.app.request(url, { method: "GET" }));
   }
 
-  async post<TResponse = unknown>(
-    url: string,
-    data: string | object | undefined,
-  ): Promise<Response & { body: TResponse }> {
-    return this.request.post(url).send(data);
+  async post<T = unknown>(url: string, data: unknown): Promise<RestResponse<T>> {
+    return toResponse<T>(
+      await this.app.request(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }),
+    );
   }
 
-  async get(url: string): Promise<Response> {
-    return this.request.get(url);
+  async put<T = unknown>(url: string, data: unknown): Promise<RestResponse<T>> {
+    return toResponse<T>(
+      await this.app.request(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }),
+    );
   }
 
-  async put(url: string, data: string | object | undefined): Promise<Response> {
-    return this.request.put(url).send(data);
-  }
-
-  async delete(url: string): Promise<Response> {
-    return this.request.delete(url);
+  async delete<T = unknown>(url: string): Promise<RestResponse<T>> {
+    return toResponse<T>(await this.app.request(url, { method: "DELETE" }));
   }
 }

@@ -1,82 +1,53 @@
-import { LoggingWinston } from "@google-cloud/logging-winston";
-import type { Request, Response } from "express";
-import winston from "winston";
+type Severity = "DEBUG" | "INFO" | "WARNING" | "ERROR";
 
-const { combine, timestamp, printf, colorize, errors, json } = winston.format;
+const LEVEL_ORDER: Record<Severity, number> = { DEBUG: 10, INFO: 20, WARNING: 30, ERROR: 40 };
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const localLogFormat = printf(({ level, message, timestamp, stack, ...metadata }) => {
-  const metaStr = Object.keys(metadata).length ? ` ${JSON.stringify(metadata)}` : "";
-  return `${String(timestamp)} ${level}: ${String(stack ?? message)}${metaStr}`;
-});
-
-function createLogger(): winston.Logger {
-  const transports: winston.transport[] = [
-    new winston.transports.Console({
-      format: isProduction
-        ? combine(timestamp(), errors({ stack: true }), json())
-        : combine(timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), errors({ stack: true }), colorize(), localLogFormat),
-    }),
-  ];
-
-  if (isProduction) {
-    try {
-      transports.push(
-        new LoggingWinston({
-          serviceContext: {
-            service: process.env.K_SERVICE ?? "k_service",
-            version: process.env.K_REVISION ?? "k_revision",
-          },
-          redirectToStdout: true,
-        }),
-      );
-    } catch (error) {
-      console.warn("Failed to initialize Google Cloud Logging:", error);
-    }
-  }
-
-  return winston.createLogger({
-    level: process.env.LOG_LEVEL ?? "info",
-    defaultMeta: { environment: process.env.NODE_ENV ?? "development" },
-    transports,
-    exceptionHandlers: [new winston.transports.Console(), ...(isProduction ? [new LoggingWinston()] : [])],
-    rejectionHandlers: [new winston.transports.Console(), ...(isProduction ? [new LoggingWinston()] : [])],
-  });
+function currentMinLevel(): number {
+  const raw = (process.env.LOG_LEVEL ?? "").toUpperCase();
+  if (raw in LEVEL_ORDER) return LEVEL_ORDER[raw as Severity];
+  if (process.env.NODE_ENV === "test") return LEVEL_ORDER.WARNING;
+  return LEVEL_ORDER.INFO;
 }
 
-const logger = createLogger();
+function write(severity: Severity, message: string, data?: Record<string, unknown>): void {
+  if (LEVEL_ORDER[severity] < currentMinLevel()) return;
+  const entry: Record<string, unknown> = {
+    severity,
+    message,
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV ?? "development",
+    ...data,
+  };
+  process.stdout.write(JSON.stringify(entry) + "\n");
+}
+
+function serializeError(error: unknown): unknown {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message, stack: error.stack };
+  }
+  return error;
+}
 
 interface StructuredLogger {
-  info: (message: string, metadata?: object) => winston.Logger;
-  warn: (message: string, metadata?: object) => winston.Logger;
-  error: (message: string, error?: Error | object, metadata?: object) => winston.Logger;
-  debug: (message: string, metadata?: object) => winston.Logger;
+  info: (message: string, metadata?: Record<string, unknown>) => void;
+  warn: (message: string, metadata?: Record<string, unknown>) => void;
+  error: (message: string, error?: unknown, metadata?: Record<string, unknown>) => void;
+  debug: (message: string, metadata?: Record<string, unknown>) => void;
 }
 
 export function createStructuredLogger(context: string): StructuredLogger {
   return {
-    info: (message, metadata) => logger.info(message, { context, ...metadata }),
-    warn: (message, metadata) => logger.warn(message, { context, ...metadata }),
-    error: (message, error, metadata) =>
-      logger.error(message, {
-        context,
-        error:
-          error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error,
-        ...metadata,
-      }),
-    debug: (message, metadata) => logger.debug(message, { context, ...metadata }),
+    debug: (message, metadata) => {
+      write("DEBUG", message, { context, ...metadata });
+    },
+    info: (message, metadata) => {
+      write("INFO", message, { context, ...metadata });
+    },
+    warn: (message, metadata) => {
+      write("WARNING", message, { context, ...metadata });
+    },
+    error: (message, error, metadata) => {
+      write("ERROR", message, { context, error: serializeError(error), ...metadata });
+    },
   };
-}
-
-export function logHttpRequest(req: Request, res: Response, duration?: number): void {
-  logger.silly("HTTP Request", {
-    method: req.method,
-    url: req.url,
-    userAgent: req.get("user-agent"),
-    ip: req.ip,
-    statusCode: res.statusCode,
-    duration,
-    context: "http-request",
-  });
 }

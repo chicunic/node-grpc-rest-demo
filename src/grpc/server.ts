@@ -3,7 +3,6 @@ import { fileURLToPath } from "node:url";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { ReflectionService } from "@grpc/reflection";
-import dotenv from "dotenv";
 import { HealthImplementation } from "grpc-health-check";
 import "reflect-metadata";
 
@@ -67,7 +66,6 @@ export function startGrpcServer(port: number): Promise<void> {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  dotenv.config();
   process.env.NODE_ENV ??= "development";
 
   const port = process.env.PORT ?? 8080;
@@ -78,7 +76,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       logger.info(`gRPC server started successfully on port ${port}`);
     })
     .catch((error: unknown) => {
-      logger.error("Failed to start gRPC server", error instanceof Error ? error : { error });
+      logger.error("Failed to start gRPC server", error);
       process.exit(1);
     });
 }

@@ -2,17 +2,18 @@
 
 一个 Node.js 后端模板，演示用户和产品服务的 CRUD API，支持两种访问方式：
 
-1. **REST API** - 基于 Express 框架
+1. **REST API** - Hono + Zod（OpenAPI 3.1），自带 Swagger UI
 2. **gRPC API** - 原生 gRPC，使用 Protocol Buffers
 
 ## 特性
 
 - **用户服务**：增删改查、列表查询
-- **产品服务**：增删改查、多条件搜索
+- **产品服务**：创建、获取、多条件搜索
 - **双协议支持**：REST (HTTP/JSON) 和 gRPC
-- **Protocol Buffers**：API 定义的单一真相源
-- **类型安全**：完整的 TypeScript 支持和 class-validator 验证
-- **优雅关闭**：正确处理系统信号
+- **REST schema-first**：Zod schema 同时驱动校验、类型推导和 OpenAPI 文档
+- **gRPC contract-first**：Protocol Buffers + class-validator
+- **RFC 9457 错误格式**：REST 错误统一使用 Problem Details (`application/problem+json`)
+- **类型安全**：完整的 TypeScript 支持
 - **线程安全**：并发安全的内存存储
 
 ## 快速开始
@@ -42,6 +43,8 @@ pnpm run dev:grpc
 服务端点：
 
 - REST API：<http://localhost:8080/api/v1/>
+- OpenAPI JSON：<http://localhost:8080/openapi.json>
+- Swagger UI：<http://localhost:8080/docs>
 - gRPC：localhost:8080
 - 健康检查：<http://localhost:8080/health>
 
@@ -49,26 +52,37 @@ pnpm run dev:grpc
 
 ### REST API (`/api/v1`)
 
-| 方法   | 端点               | 描述                 |
-| ------ | ------------------ | -------------------- |
-| GET    | `/health`          | 健康检查             |
-| POST   | `/users`           | 创建用户             |
-| GET    | `/users`           | 用户列表（支持分页） |
-| GET    | `/users/:id`       | 获取用户             |
-| PUT    | `/users/:id`       | 更新用户             |
-| DELETE | `/users/:id`       | 删除用户             |
-| POST   | `/products`        | 创建产品             |
-| GET    | `/products/:id`    | 获取产品             |
-| PUT    | `/products/:id`    | 更新产品             |
-| DELETE | `/products/:id`    | 删除产品             |
-| GET    | `/products/search` | 搜索产品（多条件）   |
+| 方法   | 端点            | 描述                 |
+| ------ | --------------- | -------------------- |
+| GET    | `/health`       | 健康检查             |
+| GET    | `/openapi.json` | OpenAPI 3.1 文档     |
+| GET    | `/docs`         | Swagger UI           |
+| POST   | `/users`        | 创建用户             |
+| GET    | `/users`        | 用户列表（支持分页） |
+| GET    | `/users/:id`    | 获取用户             |
+| PUT    | `/users/:id`    | 更新用户             |
+| DELETE | `/users/:id`    | 删除用户             |
+| POST   | `/products`     | 创建产品             |
+| GET    | `/products/:id` | 获取产品             |
+| GET    | `/products`     | 搜索产品（多条件）   |
+
+错误返回遵循 [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457)：
+
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "User not found"
+}
+```
 
 ### gRPC 服务 (端口 8080)
 
-| 服务           | 方法                                                                    |
-| -------------- | ----------------------------------------------------------------------- |
-| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers                  |
-| ProductService | CreateProduct, GetProduct, UpdateProduct, DeleteProduct, SearchProducts |
+| 服务           | 方法                                                   |
+| -------------- | ------------------------------------------------------ |
+| UserService    | CreateUser, GetUser, UpdateUser, DeleteUser, ListUsers |
+| ProductService | CreateProduct, GetProduct, SearchProducts              |
 
 ## 使用 grpcurl 测试 gRPC
 
@@ -114,18 +128,21 @@ node-grpc-rest-demo/
 ├── src/
 │   ├── grpc/           # gRPC 服务器和处理器
 │   │   ├── handlers/   # gRPC 服务实现
-│   │   ├── validators/ # gRPC 请求验证器
+│   │   ├── validators/ # gRPC 请求验证器（class-validator）
 │   │   └── server.ts   # gRPC 服务器设置
-│   ├── routes/         # REST API 路由
-│   ├── services/       # 业务逻辑层
-│   ├── types/          # TypeScript 类型定义
-│   ├── utils/          # 工具函数
-│   └── index.ts        # REST API 入口点
+│   ├── routes/         # REST API 路由（Hono + Zod）
+│   ├── schemas/        # Zod schemas（REST 单一真相源）
+│   ├── services/       # 业务逻辑层（REST 与 gRPC 共用）
+│   ├── types/          # gRPC 专属 TypeScript 类型
+│   ├── utils/          # 领域错误 + gRPC 错误处理
+│   ├── config/         # 结构化日志器（兼容 Cloud Logging）
+│   ├── config.ts       # 由 Zod 校验的环境变量
+│   ├── app.ts          # Hono 应用组装 + OpenAPI + Swagger UI
+│   └── index.ts        # REST API 入口（@hono/node-server）
 ├── tests/              # 测试文件
 │   ├── specs/
 │   │   ├── integration/ # 集成测试
-│   │   ├── unit/        # 单元测试
-│   │   └── validator/   # 验证器测试
+│   │   └── validator/   # gRPC 验证器测试
 │   └── utils/          # 测试工具
 └── package.json        # 依赖和脚本
 ```

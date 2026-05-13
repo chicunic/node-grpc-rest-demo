@@ -1,12 +1,11 @@
 import type * as grpc from "@grpc/grpc-js";
 
+import type { Product } from "../../schemas/product.js";
 import { createProduct, getProduct, searchProducts } from "../../services/product.service.js";
 import type {
-  CreateProductRequest,
   GrpcProduct,
   GrpcProductResponse,
   GrpcSearchProductsResponse,
-  Product,
 } from "../../types/product.types.js";
 import { handleGrpcError } from "../../utils/error.handler.js";
 import {
@@ -49,7 +48,7 @@ export const productServiceImplementation = {
   },
 
   CreateProduct: async (
-    call: grpc.ServerUnaryCall<CreateProductRequest, GrpcProductResponse>,
+    call: grpc.ServerUnaryCall<CreateProductRequestDto, GrpcProductResponse>,
     callback: grpc.sendUnaryData<GrpcProductResponse>,
   ): Promise<void> => {
     try {

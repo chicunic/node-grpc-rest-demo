@@ -1,8 +1,6 @@
-import type express from "express";
-
 import { SEARCH_PRODUCTS, TEST_FAKE_UUID, TEST_PRODUCT } from "../../utils/data.js";
 import { expectValidISOString, expectValidUUID, restAssert } from "../../utils/helpers.js";
-import { RestTestHelper, createCompleteTestApp } from "../../utils/server.rest.js";
+import { type HonoApp, RestTestHelper, createCompleteTestApp } from "../../utils/server.rest.js";
 
 interface ProductData {
   name: string;
@@ -18,8 +16,15 @@ interface ProductResponse extends ProductData {
   updatedAt: string;
 }
 
+interface SearchProductsResponse {
+  products: ProductResponse[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 describe("Product - REST Integration", () => {
-  let app: express.Application;
+  let app: HonoApp;
   let helper: RestTestHelper;
 
   beforeAll(async () => {
@@ -30,7 +35,7 @@ describe("Product - REST Integration", () => {
   describe("CreateProduct - REST Integration", () => {
     it("should create a new product successfully", async () => {
       const productData = TEST_PRODUCT;
-      const createResponse = await helper.post("/api/v1/products", productData);
+      const createResponse = await helper.post<ProductResponse>("/api/v1/products", productData);
 
       restAssert.expectSuccess(createResponse, 201);
       expect(createResponse.body.id).toBeDefined();
@@ -47,13 +52,11 @@ describe("Product - REST Integration", () => {
 
   describe("GetProduct - REST Integration", () => {
     it("should get a product by ID successfully", async () => {
-      // First create a product
       const productData = TEST_PRODUCT;
-      const createResponse = await helper.post("/api/v1/products", productData);
+      const createResponse = await helper.post<ProductResponse>("/api/v1/products", productData);
       const productId = createResponse.body.id;
 
-      // Then get the product
-      const getResponse = await helper.get(`/api/v1/products/${productId}`);
+      const getResponse = await helper.get<ProductResponse>(`/api/v1/products/${productId}`);
 
       restAssert.expectSuccess(getResponse, 200);
       expect(getResponse.body.id).toBe(productId);
@@ -73,16 +76,13 @@ describe("Product - REST Integration", () => {
 
   describe("SearchProducts - REST Integration", () => {
     beforeAll(async () => {
-      // Create multiple products for search testing
-      const products = SEARCH_PRODUCTS;
-
-      for (const product of products) {
+      for (const product of SEARCH_PRODUCTS) {
         await helper.post("/api/v1/products", product);
       }
     });
 
     it("should search products with default pagination", async () => {
-      const response = await helper.get("/api/v1/products?page=1&pageSize=10");
+      const response = await helper.get<SearchProductsResponse>("/api/v1/products?page=1&pageSize=10");
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
@@ -94,7 +94,9 @@ describe("Product - REST Integration", () => {
     it("should support custom pagination", async () => {
       const page = 2;
       const pageSize = 2;
-      const response = await helper.get(`/api/v1/products?page=${page}&pageSize=${pageSize}`);
+      const response = await helper.get<SearchProductsResponse>(
+        `/api/v1/products?page=${page}&pageSize=${pageSize}`,
+      );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
@@ -105,13 +107,14 @@ describe("Product - REST Integration", () => {
 
     it("should search products by query", async () => {
       const query = "iPhone";
-      const response = await helper.get(`/api/v1/products?query=${query}&page=1&pageSize=10`);
+      const response = await helper.get<SearchProductsResponse>(
+        `/api/v1/products?query=${query}&page=1&pageSize=10`,
+      );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
 
-      // Check if results contain 'iPhone'
-      response.body.products.forEach((product: ProductResponse) => {
+      response.body.products.forEach((product) => {
         const productString = JSON.stringify(product).toLowerCase();
         expect(productString).toContain(query.toLowerCase());
       });
@@ -119,13 +122,14 @@ describe("Product - REST Integration", () => {
 
     it("should filter products by category", async () => {
       const category = "Books";
-      const response = await helper.get(`/api/v1/products?category=${category}&page=1&pageSize=10`);
+      const response = await helper.get<SearchProductsResponse>(
+        `/api/v1/products?category=${category}&page=1&pageSize=10`,
+      );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
 
-      // Check if all results are in Books category
-      response.body.products.forEach((product: ProductResponse) => {
+      response.body.products.forEach((product) => {
         expect(product.category).toBe(category);
       });
       expect(response.body.products.length).toBeGreaterThanOrEqual(3);
@@ -134,15 +138,14 @@ describe("Product - REST Integration", () => {
     it("should filter products by price range", async () => {
       const minPrice = 100;
       const maxPrice = 300;
-      const response = await helper.get(
+      const response = await helper.get<SearchProductsResponse>(
         `/api/v1/products?minPrice=${minPrice}&maxPrice=${maxPrice}&page=1&pageSize=10`,
       );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
 
-      // Check if all results are within price range
-      response.body.products.forEach((product: ProductResponse) => {
+      response.body.products.forEach((product) => {
         expect(product.price).toBeGreaterThanOrEqual(minPrice);
         expect(product.price).toBeLessThanOrEqual(maxPrice);
       });
@@ -151,15 +154,14 @@ describe("Product - REST Integration", () => {
     it("should combine multiple filters", async () => {
       const category = "Electronics";
       const minPrice = 800;
-      const response = await helper.get(
+      const response = await helper.get<SearchProductsResponse>(
         `/api/v1/products?category=${category}&minPrice=${minPrice}&page=1&pageSize=10`,
       );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toBeInstanceOf(Array);
 
-      // Check if all results match both filters
-      response.body.products.forEach((product: ProductResponse) => {
+      response.body.products.forEach((product) => {
         expect(product.category).toBe(category);
         expect(product.price).toBeGreaterThanOrEqual(minPrice);
       });
@@ -167,7 +169,9 @@ describe("Product - REST Integration", () => {
 
     it("should return empty array for no matches", async () => {
       const nonexistentQuery = "NonExistentProductXYZ123";
-      const response = await helper.get(`/api/v1/products?query=${nonexistentQuery}&page=1&pageSize=10`);
+      const response = await helper.get<SearchProductsResponse>(
+        `/api/v1/products?query=${nonexistentQuery}&page=1&pageSize=10`,
+      );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.products).toEqual([]);

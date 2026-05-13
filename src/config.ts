@@ -1,0 +1,16 @@
+import { z } from "@hono/zod-openapi";
+
+const ConfigSchema = z.object({
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  PORT: z.coerce.number().int().positive().default(8080),
+  ROUTE_PREFIX: z.string().startsWith("/").default("/api/v1"),
+});
+
+const parsed = ConfigSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
+  throw new Error(`Invalid environment variables:\n${issues}`);
+}
+
+export const config = parsed.data;

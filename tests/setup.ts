@@ -2,10 +2,10 @@ import { afterAll, beforeAll, vi } from "vitest";
 
 process.env.NODE_ENV = "test";
 
-// Expected error patterns from Winston logs to suppress during tests
+// Expected error patterns in structured logs to suppress during tests
 const expectedErrors = ["Product not found", "User not found", "gRPC Error"];
 
-function shouldSuppressWinstonLog(message: string): boolean {
+function shouldSuppressLog(message: string): boolean {
   return expectedErrors.some((pattern) => message.includes(pattern));
 }
 
@@ -16,7 +16,7 @@ beforeAll(() => {
     const [chunk] = args;
     const message = typeof chunk === "string" ? chunk : String(chunk);
 
-    if (!shouldSuppressWinstonLog(message)) {
+    if (!shouldSuppressLog(message)) {
       return originalStdoutWrite(...args);
     }
 

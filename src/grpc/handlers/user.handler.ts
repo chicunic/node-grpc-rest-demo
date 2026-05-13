@@ -1,12 +1,12 @@
 import type * as grpc from "@grpc/grpc-js";
 
+import type { UpdateUserRequest, User } from "../../schemas/user.js";
 import { createUser, deleteUser, getUser, listUsers, updateUser } from "../../services/user.service.js";
 import type {
   GrpcDeleteUserResponse,
   GrpcListUsersResponse,
   GrpcUser,
   GrpcUserResponse,
-  User,
 } from "../../types/user.types.js";
 import { handleGrpcError } from "../../utils/error.handler.js";
 import {
@@ -80,7 +80,7 @@ export const userServiceImplementation = {
       }
 
       const { id, username, email, full_name, is_active } = call.request;
-      const updateData: Record<string, unknown> = {};
+      const updateData: UpdateUserRequest = {};
       if (username) updateData.username = username;
       if (email) updateData.email = email;
       if (full_name) updateData.fullName = full_name;

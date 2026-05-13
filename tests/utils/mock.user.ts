@@ -6,7 +6,7 @@ import type {
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from "../../src/types/user.types.js";
+} from "../../src/schemas/user.js";
 import { MOCK_USER_RESPONSE } from "./data.js";
 
 export const mockUserService = {

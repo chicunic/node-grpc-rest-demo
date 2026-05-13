@@ -1,8 +1,6 @@
-import type express from "express";
-
 import { LIST_USERS, TEST_FAKE_UUID, TEST_PAGINATION, TEST_USER } from "../../utils/data.js";
 import { expectValidISOString, expectValidUUID, restAssert } from "../../utils/helpers.js";
-import { RestTestHelper, createCompleteTestApp } from "../../utils/server.rest.js";
+import { type HonoApp, RestTestHelper, createCompleteTestApp } from "../../utils/server.rest.js";
 
 interface UserData {
   username: string;
@@ -18,7 +16,7 @@ interface UserResponse extends UserData {
 }
 
 describe("User - REST Integration", () => {
-  let app: express.Application;
+  let app: HonoApp;
   let helper: RestTestHelper;
   let userId: string;
 
@@ -31,7 +29,7 @@ describe("User - REST Integration", () => {
     it("should create a new user successfully", async () => {
       const userData = TEST_USER;
 
-      const response = await helper.post("/api/v1/users", userData);
+      const response = await helper.post<UserResponse>("/api/v1/users", userData);
 
       restAssert.expectSuccess(response, 201);
       expect(response.body.id).toBeDefined();
@@ -43,12 +41,11 @@ describe("User - REST Integration", () => {
       expectValidISOString(response.body.createdAt);
       expectValidISOString(response.body.updatedAt);
 
-      // Save userId for subsequent tests
       userId = response.body.id;
     });
 
     it("should get the created user by ID successfully", async () => {
-      const response = await helper.get(`/api/v1/users/${userId}`);
+      const response = await helper.get<UserResponse>(`/api/v1/users/${userId}`);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.id).toBe(userId);
@@ -63,12 +60,12 @@ describe("User - REST Integration", () => {
         fullName: "Updated Full Name",
         isActive: false,
       };
-      const response = await helper.put(`/api/v1/users/${userId}`, updateData);
+      const response = await helper.put<UserResponse>(`/api/v1/users/${userId}`, updateData);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.id).toBe(userId);
-      expect(response.body.username).toBe(TEST_USER.username); // unchanged
-      expect(response.body.email).toBe(TEST_USER.email); // unchanged
+      expect(response.body.username).toBe(TEST_USER.username);
+      expect(response.body.email).toBe(TEST_USER.email);
       expect(response.body.fullName).toBe(updateData.fullName);
       expect(response.body.isActive).toBe(updateData.isActive);
     });
@@ -77,22 +74,20 @@ describe("User - REST Integration", () => {
       const updateData = {
         email: "newemail@example.com",
       };
-      const response = await helper.put(`/api/v1/users/${userId}`, updateData);
+      const response = await helper.put<UserResponse>(`/api/v1/users/${userId}`, updateData);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.email).toBe(updateData.email);
-      expect(response.body.username).toBe(TEST_USER.username); // unchanged
-      // fullName should be from previous update
+      expect(response.body.username).toBe(TEST_USER.username);
       expect(response.body.fullName).toBe("Updated Full Name");
     });
 
     it("should delete the user successfully", async () => {
-      const response = await helper.delete(`/api/v1/users/${userId}`);
+      const response = await helper.delete<{ success: boolean }>(`/api/v1/users/${userId}`);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.success).toBe(true);
 
-      // Verify user is deleted
       const getResponse = await helper.get(`/api/v1/users/${userId}`);
       restAssert.expectError(getResponse, 404);
     });
@@ -100,16 +95,13 @@ describe("User - REST Integration", () => {
 
   describe("Error Handling - REST Integration", () => {
     it("should return 404 for non-existent user operations", async () => {
-      // Test GET
       const getResponse = await helper.get(`/api/v1/users/${TEST_FAKE_UUID}`);
       restAssert.expectError(getResponse, 404, "User not found");
 
-      // Test UPDATE
       const updateData = { fullName: "New Name" };
       const updateResponse = await helper.put(`/api/v1/users/${TEST_FAKE_UUID}`, updateData);
       restAssert.expectError(updateResponse, 404, "User not found");
 
-      // Test DELETE
       const deleteResponse = await helper.delete(`/api/v1/users/${TEST_FAKE_UUID}`);
       restAssert.expectError(deleteResponse, 404, "User not found");
     });
@@ -117,16 +109,15 @@ describe("User - REST Integration", () => {
 
   describe("ListUsers - REST Integration", () => {
     beforeAll(async () => {
-      // Create multiple users for list testing
-      const users = LIST_USERS;
-
-      for (const user of users) {
+      for (const user of LIST_USERS) {
         await helper.post("/api/v1/users", user);
       }
     });
 
     it("should list users with default pagination", async () => {
-      const response = await helper.get("/api/v1/users?page=1&pageSize=10");
+      const response = await helper.get<{ users: UserResponse[]; totalCount: number; page: number; pageSize: number }>(
+        "/api/v1/users?page=1&pageSize=10",
+      );
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.users).toBeInstanceOf(Array);
@@ -136,7 +127,7 @@ describe("User - REST Integration", () => {
     });
 
     it("should support custom pagination", async () => {
-      const response = await helper.get(
+      const response = await helper.get<{ users: UserResponse[]; page: number; pageSize: number }>(
         `/api/v1/users?page=${TEST_PAGINATION.DEFAULT_PAGE}&pageSize=${TEST_PAGINATION.SMALL_PAGE_SIZE}`,
       );
 
@@ -148,28 +139,26 @@ describe("User - REST Integration", () => {
     });
 
     it("should support sorting", async () => {
-      const response = await helper.get(`/api/v1/users?sortBy=username&page=1&pageSize=10`);
+      const response = await helper.get<{ users: UserResponse[] }>(`/api/v1/users?sortBy=username&page=1&pageSize=10`);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.users).toBeInstanceOf(Array);
 
-      // Check if sorted by username
       expect(response.body.users.length).toBeGreaterThan(1);
       for (let i = 0; i < response.body.users.length - 1; i++) {
-        const currentUsername = response.body.users[i].username;
-        const nextUsername = response.body.users[i + 1].username;
+        const currentUsername = response.body.users[i]!.username;
+        const nextUsername = response.body.users[i + 1]!.username;
         expect(currentUsername.localeCompare(nextUsername)).toBeLessThanOrEqual(0);
       }
     });
 
     it("should support filtering", async () => {
-      const response = await helper.get(`/api/v1/users?filter=alice&page=1&pageSize=10`);
+      const response = await helper.get<{ users: UserResponse[] }>(`/api/v1/users?filter=alice&page=1&pageSize=10`);
 
       restAssert.expectSuccess(response, 200);
       expect(response.body.users).toBeInstanceOf(Array);
 
-      // Check if filtered results contain 'alice'
-      response.body.users.forEach((user: UserResponse) => {
+      response.body.users.forEach((user) => {
         const userString = JSON.stringify(user).toLowerCase();
         expect(userString).toContain("alice");
       });

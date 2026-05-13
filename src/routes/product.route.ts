@@ -1,53 +1,82 @@
-import { type Request, type Response, Router } from "express";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
+import {
+  CreateProductSchema,
+  ProductIdParamSchema,
+  ProductSchema,
+  SearchProductsQuerySchema,
+  SearchProductsResponseSchema,
+} from "../schemas/product.js";
 import { createProduct, getProduct, searchProducts } from "../services/product.service.js";
-import type {
-  CreateProductRequest,
-  GetProductParams,
-  Product,
-  SearchProductsResponse,
-} from "../types/product.types.js";
-import { type ErrorResponse, handleRouteError } from "../utils/error.handler.js";
+import { defaultHook, jsonError } from "../schemas/common.js";
 
-const router = Router();
+const app = new OpenAPIHono({ defaultHook: defaultHook() });
 
-router.get("/products/:id", async (req: Request<GetProductParams>, res: Response<Product | ErrorResponse>) => {
-  try {
-    const { id } = req.params;
-    const result = await getProduct(id);
-    res.status(200).json(result);
-  } catch (error) {
-    handleRouteError(error, res, "GET /products/:id endpoint");
-  }
-});
-
-router.post(
-  "/products",
-  async (req: Request<unknown, unknown, CreateProductRequest>, res: Response<Product | ErrorResponse>) => {
-    try {
-      const product = await createProduct(req.body);
-      res.status(201).json(product);
-    } catch (error) {
-      handleRouteError(error, res, "POST /products endpoint");
-    }
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/products/{id}",
+    summary: "Get a product by ID",
+    tags: ["Products"],
+    request: { params: ProductIdParamSchema },
+    responses: {
+      200: { content: { "application/json": { schema: ProductSchema } }, description: "Product found" },
+      400: jsonError("Validation error"),
+      404: jsonError("Product not found"),
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const product = await getProduct(id);
+    return c.json(product, 200);
   },
 );
 
-router.get("/products", async (req: Request, res: Response<SearchProductsResponse | ErrorResponse>) => {
-  try {
-    const { query, category, minPrice, maxPrice, page, pageSize } = req.query;
-    const result = await searchProducts({
-      query: typeof query === "string" ? query : undefined,
-      category: typeof category === "string" ? category : undefined,
-      minPrice: typeof minPrice === "string" ? Number(minPrice) : undefined,
-      maxPrice: typeof maxPrice === "string" ? Number(maxPrice) : undefined,
-      page: Number(page),
-      pageSize: Number(pageSize),
-    });
-    res.json(result);
-  } catch (error) {
-    handleRouteError(error, res, "GET /products endpoint");
-  }
-});
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/products",
+    summary: "Create a new product",
+    tags: ["Products"],
+    request: {
+      body: {
+        content: { "application/json": { schema: CreateProductSchema } },
+        description: "Product data to create",
+        required: true,
+      },
+    },
+    responses: {
+      201: { content: { "application/json": { schema: ProductSchema } }, description: "Product created" },
+      400: jsonError("Validation error"),
+    },
+  }),
+  async (c) => {
+    const body = c.req.valid("json");
+    const product = await createProduct(body);
+    return c.json(product, 201);
+  },
+);
 
-export const productRoutes: Router = router;
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/products",
+    summary: "Search products",
+    tags: ["Products"],
+    request: { query: SearchProductsQuerySchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: SearchProductsResponseSchema } },
+        description: "Paginated list of products",
+      },
+      400: jsonError("Validation error"),
+    },
+  }),
+  async (c) => {
+    const query = c.req.valid("query");
+    const result = await searchProducts(query);
+    return c.json(result, 200);
+  },
+);
+
+export const productRoutes = app;

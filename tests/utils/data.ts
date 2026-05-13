@@ -1,5 +1,5 @@
-import type { CreateProductRequest, Product } from "../../src/types/product.types.js";
-import type { CreateUserRequest, User } from "../../src/types/user.types.js";
+import type { CreateProductRequest, Product } from "../../src/schemas/product.js";
+import type { CreateUserRequest, User } from "../../src/schemas/user.js";
 
 export const TEST_FAKE_UUID = "123e4567-e89b-4321-a456-426614174000";
 

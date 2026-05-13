@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import type {
   CreateUserRequest,
@@ -6,14 +6,15 @@ import type {
   ListUsersResponse,
   UpdateUserRequest,
   User,
-} from "../types/user.types.js";
+} from "../schemas/user.js";
+import { NotFoundError } from "../utils/errors.js";
 
 const users = new Map<string, User>();
 
 export async function getUser(id: string): Promise<User> {
   const user = users.get(id);
   if (!user) {
-    throw new Error("User not found");
+    throw new NotFoundError("User not found");
   }
   return user;
 }
@@ -21,7 +22,7 @@ export async function getUser(id: string): Promise<User> {
 export async function createUser(data: CreateUserRequest): Promise<User> {
   const now = new Date().toISOString();
   const user: User = {
-    id: uuidv4(),
+    id: randomUUID(),
     username: data.username,
     email: data.email,
     fullName: data.fullName,
@@ -37,7 +38,7 @@ export async function createUser(data: CreateUserRequest): Promise<User> {
 export async function updateUser(id: string, data: UpdateUserRequest): Promise<User> {
   const user = await getUser(id);
 
-  const updatedUser = {
+  const updatedUser: User = {
     ...user,
     ...data,
     updatedAt: new Date().toISOString(),

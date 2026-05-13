@@ -1,76 +1,135 @@
-import { type Request, type Response, Router } from "express";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
+import {
+  CreateUserSchema,
+  DeleteUserResponseSchema,
+  ListUsersQuerySchema,
+  ListUsersResponseSchema,
+  UpdateUserSchema,
+  UserIdParamSchema,
+  UserSchema,
+} from "../schemas/user.js";
 import { createUser, deleteUser, getUser, listUsers, updateUser } from "../services/user.service.js";
-import type {
-  CreateUserRequest,
-  DeleteUserResponse,
-  GetUserParams,
-  ListUsersResponse,
-  UpdateUserRequest,
-  User,
-} from "../types/user.types.js";
-import { type ErrorResponse, handleRouteError } from "../utils/error.handler.js";
+import { defaultHook, jsonError } from "../schemas/common.js";
 
-const router = Router();
+const app = new OpenAPIHono({ defaultHook: defaultHook() });
 
-router.get("/users/:id", async (req: Request<GetUserParams>, res: Response<User | ErrorResponse>) => {
-  try {
-    const { id } = req.params;
-    const result = await getUser(id);
-    res.status(200).json(result);
-  } catch (error) {
-    handleRouteError(error, res, "GET /users/:id endpoint");
-  }
-});
-
-router.post(
-  "/users",
-  async (req: Request<unknown, unknown, CreateUserRequest>, res: Response<User | ErrorResponse>) => {
-    try {
-      const result = await createUser(req.body);
-      res.status(201).json(result);
-    } catch (error) {
-      handleRouteError(error, res, "POST /users endpoint");
-    }
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/users/{id}",
+    summary: "Get a user by ID",
+    tags: ["Users"],
+    request: { params: UserIdParamSchema },
+    responses: {
+      200: { content: { "application/json": { schema: UserSchema } }, description: "User found" },
+      400: jsonError("Validation error"),
+      404: jsonError("User not found"),
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const user = await getUser(id);
+    return c.json(user, 200);
   },
 );
 
-router.put(
-  "/users/:id",
-  async (req: Request<GetUserParams, unknown, UpdateUserRequest>, res: Response<User | ErrorResponse>) => {
-    try {
-      const { id } = req.params;
-      const result = await updateUser(id, req.body);
-      res.status(200).json(result);
-    } catch (error) {
-      handleRouteError(error, res, "PUT /users/:id endpoint");
-    }
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/users",
+    summary: "Create a new user",
+    tags: ["Users"],
+    request: {
+      body: {
+        content: { "application/json": { schema: CreateUserSchema } },
+        description: "User data to create",
+        required: true,
+      },
+    },
+    responses: {
+      201: { content: { "application/json": { schema: UserSchema } }, description: "User created" },
+      400: jsonError("Validation error"),
+    },
+  }),
+  async (c) => {
+    const body = c.req.valid("json");
+    const user = await createUser(body);
+    return c.json(user, 201);
   },
 );
 
-router.delete("/users/:id", async (req: Request<GetUserParams>, res: Response<DeleteUserResponse | ErrorResponse>) => {
-  try {
-    const { id } = req.params;
-    const result = await deleteUser(id);
-    res.status(200).json({ success: result });
-  } catch (error) {
-    handleRouteError(error, res, "DELETE /users/:id endpoint");
-  }
-});
+app.openapi(
+  createRoute({
+    method: "put",
+    path: "/users/{id}",
+    summary: "Update an existing user",
+    tags: ["Users"],
+    request: {
+      params: UserIdParamSchema,
+      body: {
+        content: { "application/json": { schema: UpdateUserSchema } },
+        description: "User fields to update",
+        required: true,
+      },
+    },
+    responses: {
+      200: { content: { "application/json": { schema: UserSchema } }, description: "User updated" },
+      400: jsonError("Validation error"),
+      404: jsonError("User not found"),
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const user = await updateUser(id, body);
+    return c.json(user, 200);
+  },
+);
 
-router.get("/users", async (req: Request, res: Response<ListUsersResponse | ErrorResponse>) => {
-  try {
-    const { page, pageSize, sortBy, filter } = req.query;
-    const result = await listUsers({
-      page: Number(page),
-      pageSize: Number(pageSize),
-      sortBy: typeof sortBy === "string" ? sortBy : undefined,
-      filter: typeof filter === "string" ? filter : undefined,
-    });
-    res.status(200).json(result);
-  } catch (error) {
-    handleRouteError(error, res, "GET /users endpoint");
-  }
-});
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/users/{id}",
+    summary: "Delete a user",
+    tags: ["Users"],
+    request: { params: UserIdParamSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: DeleteUserResponseSchema } },
+        description: "User deleted",
+      },
+      400: jsonError("Validation error"),
+      404: jsonError("User not found"),
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    await deleteUser(id);
+    return c.json({ success: true }, 200);
+  },
+);
 
-export const userRoutes: Router = router;
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/users",
+    summary: "List users",
+    tags: ["Users"],
+    request: { query: ListUsersQuerySchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: ListUsersResponseSchema } },
+        description: "Paginated list of users",
+      },
+      400: jsonError("Validation error"),
+    },
+  }),
+  async (c) => {
+    const query = c.req.valid("query");
+    const result = await listUsers(query);
+    return c.json(result, 200);
+  },
+);
+
+export const userRoutes = app;

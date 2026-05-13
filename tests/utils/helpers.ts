@@ -1,8 +1,7 @@
-import { isUUID } from "class-validator";
-import type { Response } from "supertest";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function expectValidUUID(uuid: string): void {
-  expect(isUUID(uuid, "4")).toBe(true);
+  expect(UUID_RE.test(uuid)).toBe(true);
 }
 
 export function expectValidISOString(dateString: string): void {
@@ -11,17 +10,25 @@ export function expectValidISOString(dateString: string): void {
   expect(date.toISOString()).toBe(dateString);
 }
 
+export interface RestResponse<T = unknown> {
+  status: number;
+  body: T;
+  headers: Headers;
+}
+
 export const restAssert = {
-  expectSuccess(response: Response, expectedStatus = 200): void {
+  expectSuccess(response: RestResponse, expectedStatus = 200): void {
     expect(response.status).toBe(expectedStatus);
     expect(response.body).toBeDefined();
   },
 
-  expectError(response: Response, expectedStatus: number, expectedMessage?: string): void {
+  expectError(response: RestResponse, expectedStatus: number, expectedMessage?: string): void {
     expect(response.status).toBe(expectedStatus);
-    expect(response.body.error).toBeDefined();
+    const body = response.body as { detail?: string; title?: string };
+    expect(body).toBeDefined();
     if (expectedMessage) {
-      expect(response.body.error).toContain(expectedMessage);
+      const haystack = `${body.title ?? ""} ${body.detail ?? ""}`;
+      expect(haystack).toContain(expectedMessage);
     }
   },
 };
