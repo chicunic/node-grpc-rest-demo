@@ -21,7 +21,7 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.1.1+sha512.d1fdf5f73c617b64fa1a56a81c3c8dfe0e966e33a6010aa256b517ae77be21d93e05affc0de1a83b0e4f29d569f68b446ae8f068cd7247c0bb3df0fb4d7bdf9a",
+  "packageManager": "pnpm@11.6.0+sha512.9a36518224080c6fe5165afdcfe79bfa118c29be703f3f462b1e32efe1e98e47e8750b148e08286250aad4113cc7993ca413c4e2cd447752708c2ee5751bc95f",
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
     "dev:grpc": "tsx watch --env-file-if-exists=.env src/grpc/server.ts",
@@ -43,30 +43,30 @@
     "@grpc/grpc-js": "^1.14.4",
     "@grpc/proto-loader": "^0.8.1",
     "@grpc/reflection": "^1.0.4",
-    "@hono/node-server": "^2.0.2",
+    "@hono/node-server": "^2.0.4",
     "@hono/swagger-ui": "^0.6.1",
     "@hono/zod-openapi": "^1.4.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "grpc-health-check": "^2.1.0",
-    "hono": "^4.12.21",
+    "hono": "^4.12.25",
     "reflect-metadata": "^0.2.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.7.0",
-    "@vitest/coverage-v8": "^4.1.6",
-    "@vitest/eslint-plugin": "^1.6.17",
-    "eslint": "^10.3.0",
+    "@types/node": "^25.9.3",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/eslint-plugin": "^1.6.20",
+    "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "jiti": "^2.7.0",
-    "prettier": "^3.8.3",
-    "tsx": "^4.21.0",
+    "prettier": "^3.8.4",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.3",
-    "vitest": "^4.1.6"
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^4.1.8"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
