@@ -1,8 +1,6 @@
 allowBuilds:
   esbuild: true
   protobufjs: true
-onlyBuiltDependencies:
-  - '@bufbuild/buf'
-  - protobufjs
-overrides:
-  '@tootallnate/once': ^3.0.1
+minimumReleaseAgeExclude:
+  - '@hono/node-server@2.1.8'
+  - prettier@3.10.1

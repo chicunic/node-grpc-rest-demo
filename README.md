@@ -20,7 +20,7 @@ A Node.js backend template demonstrating User and Product services with CRUD API
 
 ### Prerequisites
 
-- Node.js >= 22
+- Node.js >= 26
 - pnpm (recommended) or npm
 - (Optional) `grpcurl` for testing gRPC endpoints
 
@@ -104,7 +104,7 @@ grpcurl -plaintext -d '{"username":"john","email":"john@example.com","full_name"
 ## Available Scripts
 
 ```bash
-pnpm run build             # Build TypeScript project (auto-runs proto:types via prebuild)
+pnpm run build             # Generate gRPC types and build the TypeScript project
 pnpm run start             # Start REST API server (tsx)
 pnpm run start:grpc        # Start gRPC server (tsx)
 pnpm run start:prod        # Start REST API from compiled dist/
@@ -115,7 +115,7 @@ pnpm run test              # Run unit test suite
 pnpm run test:watch        # Run tests in watch mode
 pnpm run test:coverage     # Run tests with coverage report
 pnpm run test:integration  # Run integration test suite
-pnpm run check             # Type check + ESLint + Prettier check
+pnpm run check             # Generate gRPC types, then run TypeScript, ESLint, and Prettier checks
 pnpm run fix               # Auto-fix ESLint + Prettier issues
 ```
 

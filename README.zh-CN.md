@@ -20,7 +20,7 @@
 
 ### 前置要求
 
-- Node.js >= 22
+- Node.js >= 26
 - pnpm（推荐）或 npm
 - （可选）`grpcurl` 用于测试 gRPC 端点
 
@@ -104,7 +104,7 @@ grpcurl -plaintext -d '{"username":"john","email":"john@example.com","full_name"
 ## 可用脚本
 
 ```bash
-pnpm run build             # 构建 TypeScript 项目（prebuild 会自动跑 proto:types）
+pnpm run build             # 生成 gRPC 类型并构建 TypeScript 项目
 pnpm run start             # 启动 REST API 服务器（tsx）
 pnpm run start:grpc        # 启动 gRPC 服务器（tsx）
 pnpm run start:prod        # 从编译后的 dist/ 启动 REST API
@@ -115,7 +115,7 @@ pnpm run test              # 运行单元测试
 pnpm run test:watch        # 监听模式运行测试
 pnpm run test:coverage     # 运行带覆盖率报告的测试
 pnpm run test:integration  # 运行集成测试
-pnpm run check             # 类型检查 + ESLint + Prettier 检查
+pnpm run check             # 生成 gRPC 类型，再运行 TypeScript、ESLint 和 Prettier 检查
 pnpm run fix               # 自动修复 ESLint + Prettier 问题
 ```
 
